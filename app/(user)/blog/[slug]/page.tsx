@@ -2,7 +2,7 @@ import { BlogSpecificPage } from '@/components/layout/blog page/BlogSpecificPage
 import { client } from '@/sanity/lib/client';
 import { POST_QUERY } from '@/sanity/Queries';
 
-const Page = async ({ params }) => {
+const Page = async ({ params }: { params: { slug: string } }) => {
     const { slug } = await params
 
     const post = await client.fetch(

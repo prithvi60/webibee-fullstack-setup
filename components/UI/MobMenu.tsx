@@ -6,10 +6,16 @@ import { IoClose } from "react-icons/io5";
 import { IoIosArrowDown } from "react-icons/io";
 import Link from "next/link";
 
-export default function MobMenu({ Menus }) {
+interface Menu {
+  menu: string;
+  link?: string;
+  subMenus?: { menu: string; link: string }[];
+}
+
+export default function MobMenu({ Menus }: { Menus: Menu[] }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [openMenuIndex, setOpenMenuIndex] = useState(null);
-  const [openSubMenuIndex, setOpenSubMenuIndex] = useState(null);
+  const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
+  const [openSubMenuIndex, setOpenSubMenuIndex] = useState<number | null>(null);
 
   const toggleDrawer = () => {
     setIsOpen(!isOpen);

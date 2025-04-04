@@ -1,8 +1,20 @@
 "use client";
 import { useEffect, useState } from "react";
-import NeuFollowButton from "../UI/NeuFollowButton";
 
-const CalendlyLink = ({ type }) => {
+// Extend the Window interface to include the Calendly property
+declare global {
+    interface Window {
+        Calendly?: {
+            initPopupWidget: (options: { url: string }) => void;
+        };
+    }
+}
+
+interface CalendlyLinkProps {
+    type: string;
+}
+
+const CalendlyLink = ({ type }: CalendlyLinkProps) => {
     const [isScriptLoaded, setIsScriptLoaded] = useState(false);
     const url = process.env.NEXT_PUBLIC_CALENDLY_ID;
 
@@ -32,22 +44,24 @@ const CalendlyLink = ({ type }) => {
         return /(iphone|ipad|ipod|macintosh)/i.test(userAgent);
     };
 
-    const handleCalendlyClick = (e) => {
+    interface HandleCalendlyClickEvent extends React.MouseEvent<HTMLButtonElement> { }
+
+    const handleCalendlyClick = (e: HandleCalendlyClickEvent): void => {
         e.preventDefault();
         e.stopPropagation();
 
         if (isAppleDevice()) {
             // Redirect to Calendly URL for Apple devices
-            window.location.href = url;
+            window.location.href = url as string;
         } else {
             // Use popup for non-Apple devices
             if (window.Calendly && isScriptLoaded) {
-                window.Calendly.initPopupWidget({ url });
+                window.Calendly.initPopupWidget({ url: url as string });
             } else {
                 console.error("Calendly not ready. Script loaded:", isScriptLoaded);
                 setTimeout(() => {
                     if (window.Calendly) {
-                        window.Calendly.initPopupWidget({ url });
+                        window.Calendly.initPopupWidget({ url: url as string });
                     } else {
                         alert("Unable to load Calendly. Please try again later.");
                     }
@@ -59,7 +73,7 @@ const CalendlyLink = ({ type }) => {
     return (
         <button
             style={{
-                transform,
+                transform: "scale(1)", // Replace with a valid CSS transform value
             }}
             onClick={handleCalendlyClick}
             className={`bg-black font-bold transition-all duration-300 rounded-lg border-2 border-solid border-white text-white cursor-pointer text-sm md:text-base hover:scale-110 shadow-xl px-3 py-2 md:py-3.5 md:px-5`}

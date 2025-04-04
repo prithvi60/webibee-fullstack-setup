@@ -4,7 +4,7 @@ import { Readable } from "stream";
 
 export async function GET() {
   // Static routes
-  const links = [
+  const links: Array<any> = [
     // { url: "/", changefreq: "daily", priority: 1.0 },
     // {
     //   url: "/",
@@ -30,13 +30,24 @@ export async function GET() {
     const posts = await client.fetch(
       `*[_type == "post"]{ "url": slug.current }`
     );
-    posts.forEach((post) => {
+    interface Post {
+      url: string;
+    }
+
+    interface Link {
+      url: string;
+      changefreq: string;
+      priority: number;
+      lastmod?: string;
+    }
+
+    posts.forEach((post: Post) => {
       links.push({
-        url: `/resources/blog/${post.url}`,
-        changefreq: "weekly",
-        priority: 0.9,
-        lastmod: new Date().toISOString(),
-      });
+      url: `/resources/blog/${post.url}`,
+      changefreq: "weekly",
+      priority: 0.9,
+      lastmod: new Date().toISOString(),
+      } as Link);
     });
 
     const hostname = "https://webibee.com";

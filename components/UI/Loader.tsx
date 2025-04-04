@@ -1,10 +1,10 @@
 "use client";
 import { motion } from "framer-motion";
 
-const Loader = ({ styles, type }) => {
+const Loader = () => {
     return (
         <div className="w-full">
-            <BarLoader styles={styles} type={type} />
+            <BarLoader />
         </div>
     );
 };
@@ -19,14 +19,14 @@ const variants = {
         opacity: 1,
         transition: {
             repeat: Infinity,
-            repeatType: "mirror",
+            repeatType: "mirror" as const,
             duration: 1,
             ease: "circIn",
         },
     },
 };
 
-const BarLoader = ({ styles, type }) => {
+const BarLoader = () => {
     return (
         <motion.div
             transition={{
@@ -38,23 +38,23 @@ const BarLoader = ({ styles, type }) => {
         >
             <motion.div
                 variants={variants}
-                className={`w-2 h-6 ${type === "main" ? styles : "bg-white"}`}
+                className={`w-2 h-6 bg-white`}
             />
             <motion.div
                 variants={variants}
-                className={`w-2 h-6 ${type === "main" ? styles : "bg-white"}`}
+                className={`w-2 h-6 bg-white`}
             />
             <motion.div
                 variants={variants}
-                className={`w-2 h-6 ${type === "main" ? styles : "bg-white"}`}
+                className={`w-2 h-6 bg-white`}
             />
             <motion.div
                 variants={variants}
-                className={`w-2 h-6 ${type === "main" ? styles : "bg-white"}`}
+                className={`w-2 h-6 bg-white`}
             />
             <motion.div
                 variants={variants}
-                className={`w-2 h-6 ${type === "main" ? styles : "bg-white"}`}
+                className={`w-2 h-6 bg-white`}
             />
         </motion.div>
     );

@@ -1,4 +1,4 @@
-export function generateEmailTemplateForUser(mainContent, title) {
+export function generateEmailTemplateForUser(mainContent: string, title: string) {
     const imageUrl = "https://ik.imagekit.io/webibee/Webibee/webibeepurplelogo.png";
     return `
       <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f9f9; padding: 20px; border-radius: 8px; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;">
@@ -36,7 +36,7 @@ export function generateEmailTemplateForUser(mainContent, title) {
           `;
 }
 
-export function generateEmailTemplateForClient(mainContent) {
+export function generateEmailTemplateForClient(mainContent: string) {
     const imageUrl = "https://ik.imagekit.io/webibee/Webibee/webibeepurplelogo.png";
     return `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f9f9; padding: 20px; border-radius: 8px; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;">

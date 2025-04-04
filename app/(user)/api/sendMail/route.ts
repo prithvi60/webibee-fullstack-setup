@@ -14,12 +14,27 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function POST(req) {
-  const { name, email, message, title } = await req.json();
+interface EmailRequestBody {
+  name: string;
+  email: string;
+  message: string;
+  title: string;
+}
 
-  const capitalized = title.charAt(0).toUpperCase() + title.slice(1);
+interface MailOptions {
+  from: string;
+  to: string;
+  subject: string;
+  html: string;
+  bcc?: string[];
+}
 
-  const messageForClient = `
+export async function POST(req: Request): Promise<Response> {
+  const { name, email, message, title }: EmailRequestBody = await req.json();
+
+  const capitalized: string = title.charAt(0).toUpperCase() + title.slice(1);
+
+  const messageForClient: string = `
   <p style="font-size: 16px; color: #555;"><strong>Valuable customer insights derived from ${title}:</strong></p>
             <p style="font-size: 16px; color: #555;"><strong>Name:</strong> ${name}</p>
             <p style="font-size: 16px; color: #555;"><strong>Email:</strong> ${email}</p>
@@ -34,7 +49,7 @@ export async function POST(req) {
             }
   `;
 
-  const messageForUser = `
+  const messageForUser: string = `
   <p style="font-size: 16px; color: #555;">Dear <strong>${name}</strong>,</p>
   `;
 
@@ -46,15 +61,15 @@ export async function POST(req) {
     );
   }
 
-  const clientMailOptions = {
+  const clientMailOptions: MailOptions = {
     from: `"${email}" <${"support@webibee.com"}>`,
-    to: process.env.EMAIL_ID,
+    to: process.env.EMAIL_ID!,
     subject: `New Customer Form Submitted - ${capitalized} Page`,
     html: generateEmailTemplateForClient(messageForClient),
     // bcc: ["reachout@penthusiasts.com"],
   };
 
-  const userMailOptions = {
+  const userMailOptions: MailOptions = {
     from: `Business Portfolio - "${process.env.EMAIL_ID}" <support@webibee.com>`,
     to: email,
     subject: "Acknowledgment: We received your Submission",
@@ -72,7 +87,7 @@ export async function POST(req) {
       success: true,
       message: "Emails sent successfully",
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error sending emails:", error);
     return NextResponse.json(
       { success: false, message: error.message || "Error sending emails" },

@@ -1,9 +1,16 @@
 import { PortableText } from "next-sanity";
 
-export const BlogSpecificPage = ({ post }) => {
+interface Post {
+  title: string;
+  plainBody: string[];
+  publishedAt: string;
+  body: any; // Replace 'any' with the appropriate type if known
+}
+
+export const BlogSpecificPage = ({ post }: { post: Post }) => {
   const readableTime = post.plainBody.filter(Boolean).join(" ");
 
-  const calculateReadTime = (text) => {
+  const calculateReadTime = (text: string): number => {
     const wordsPerMinute = 200;
     const wordCount = text.split(/\s+/).length;
     const readingTime = Math.ceil(wordCount / wordsPerMinute);
@@ -42,7 +49,7 @@ export const BlogSpecificPage = ({ post }) => {
 
 const customComponents = {
   types: {
-    image: ({ value }) => (
+    image: ({ value }: { value: { imageUrl: string; alt?: string } }) => (
       <img
         src={value?.imageUrl}
         alt={value?.alt || "Image"}

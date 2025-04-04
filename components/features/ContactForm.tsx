@@ -11,7 +11,7 @@ export const ContactForm = () => {
     const [formData, setFormData] = useState(initialFormData);
     const [status, setStatus] = useState(false);
 
-    const handleChange = (e) => {
+    const handleChange = (e: { target: { name: any; value: any; }; }) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
@@ -19,7 +19,7 @@ export const ContactForm = () => {
         }));
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setStatus(true);
 
@@ -50,7 +50,7 @@ export const ContactForm = () => {
             if (emailDataResult.success) {
                 setStatus(false);
                 setFormData(initialFormData);
-                e.target.reset();
+                (e.target as HTMLFormElement).reset();
             }
         } catch (error) {
             console.error("Error sending emails:", error);
@@ -96,7 +96,6 @@ export const ContactForm = () => {
                         message
                     </label>
                     <textarea
-                        type="text"
                         id="message"
                         name="message"
                         value={formData.message || ""}

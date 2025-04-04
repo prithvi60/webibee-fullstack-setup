@@ -5,7 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function DesktopMenu({ menu }) {
+interface Menu {
+  menu: string;
+  link?: string;
+  subMenus?: { menu: string; link?: string }[];
+}
+
+export default function DesktopMenu({ menu }: { menu: Menu }) {
   const [isHover, setIsHover] = useState(false);
 
   const handleMouseEnter = () => setIsHover(true);
@@ -75,7 +81,7 @@ export default function DesktopMenu({ menu }) {
                 {menu.subMenus?.map((item, idx) => (
                   <div key={idx}>
                     <Link title={item.menu}
-                      href={item.link}
+                      href={item.link || "#"}
                       className="text-lg font-semibold pb-2.5"
                     >
                       {item.menu}

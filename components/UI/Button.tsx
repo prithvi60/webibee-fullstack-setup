@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export const GetStartButton = ({ text, href }) => {
+export const GetStartButton = ({ text, href }: { text: string, href: string }) => {
     return (
         <Link
             title={`${text} page`}
