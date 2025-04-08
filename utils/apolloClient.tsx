@@ -8,7 +8,7 @@ import { setContext } from "@apollo/client/link/context";
 import { User } from "next-auth";
 
 interface CustomUser extends User {
-  accessToken?: string;
+    accessToken?: string;
 }
 
 const getGraphqlUri = () => {
@@ -27,7 +27,7 @@ export const useAuthApollo = () => {
             },
         });
 
-        const authLink = setContext((_, { headers }) => {
+        const authLink = setContext((_: unknown, { headers }: { headers?: Record<string, string> }) => {
             try {
                 const token = (session?.user as CustomUser)?.accessToken;
 

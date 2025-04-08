@@ -6,7 +6,7 @@ import jwt, { Jwt } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import type { NextAuthConfig } from "next-auth";
 import type { User, Session } from "next-auth";
-import prisma from "../../prisma/db";
+import prisma from "@/prisma/db";
 
 // Type for user with extra properties
 interface CustomUser extends User {
@@ -37,7 +37,8 @@ const JWT_SECRET = process.env.AUTH_SECRET;
 if (!JWT_SECRET) {
   throw new Error("AUTH_SECRET is not defined in environment variables");
 }
-
+if (!process.env.NEXTAUTH_DATABASE_URL)
+  throw new Error("NEXTAUTH_DATABASE_URL is not defined");
 // Generate JWT for credentials-based authentication
 const generateToken = (user: { id: number; email: string }): string => {
   return jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
@@ -112,7 +113,7 @@ const authConfig: NextAuthConfig = {
   pages: {
     signIn: "/sign-in", // Custom login page
   },
-  adapter: PrismaAdapter(prisma),
+  // adapter: PrismaAdapter(prisma),
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === "google") {
@@ -174,6 +175,7 @@ const authConfig: NextAuthConfig = {
       return customSession;
     },
   },
+  // debug: true,
 };
 
 // Export handlers for use in route handlers

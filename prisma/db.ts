@@ -3,26 +3,15 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { Pool, neonConfig } from "@neondatabase/serverless";
 
-const prismaClientSingleton = () => {
-  neonConfig.webSocketConstructor = ws;
-  const connectionString = `${process.env.NEXTAUTH_DATABASE_URL}`;
-
-  const pool = new Pool({ connectionString });
-  const adapter = new PrismaNeon(pool);
-
-  const prisma = new PrismaClient({ adapter });
-
-  return prisma;
+const globalForPrisma = global as unknown as {
+  prisma: PrismaClient;
 };
 
-type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>;
+neonConfig.webSocketConstructor = ws;
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClientSingleton | undefined;
-};
-
-const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
-
+const connectionString = `${process.env.DATABASE_URL}`;
+const pool = new Pool({ connectionString });
+const adapter = new PrismaNeon(pool);
+const prisma = globalForPrisma.prisma || new PrismaClient({ adapter });
+if (process.env.NODE_ENV === "development") globalForPrisma.prisma = prisma;
 export default prisma;

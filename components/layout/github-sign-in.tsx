@@ -1,5 +1,5 @@
-import { Google } from "@/components/ui/github";
-import { signIn } from "@/lib/auth";
+import { signIn } from "@/utils/auth";
+import { Google } from "../UI/github";
 
 const GithubSignIn = () => {
   return (

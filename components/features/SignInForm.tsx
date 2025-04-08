@@ -22,7 +22,7 @@ const SignInForm = async () => {
       </div>
 
       {/* Email/Password Sign In */}
-      <form
+      {/* <form
         className="space-y-4"
         // action={credentialsAction}
         action={async (formData: FormData) => {
@@ -51,7 +51,7 @@ const SignInForm = async () => {
         <button type="submit" className="rounded-lg border-2 border-solid border-white bg-black px-2 py-2 md:py-3 md:px-4 font-semibold capitalize text-white text-sm transition-all duration-300 hover:scale-110">
           Sign In
         </button>
-      </form>
+      </form> */}
 
       <CredentialsSignIn />
       <div className="text-center text-blue-800 text-base md:text-lg">

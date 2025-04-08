@@ -1,5 +1,4 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
 
 const SignOut = () => {
@@ -9,9 +8,9 @@ const SignOut = () => {
 
   return (
     <div className="flex justify-center">
-      <Button variant="destructive" onClick={handleSignOut}>
+      <button className="py-2 px-3 cursor-pointer bg-black text-white rounded text-sm md:text-base" onClick={handleSignOut}>
         Sign Out
-      </Button>
+      </button>
     </div>
   );
 };

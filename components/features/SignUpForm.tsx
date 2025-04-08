@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "@apollo/client";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { SIGN_UP } from "@/lib/Queries";
-import { Loader } from "../ui/Loader";
+import { SIGN_UP } from "@/utils/Queries";
+import Loader from "../UI/Loader";
+import { useMutation } from "@apollo/client";
 
 
 // Define the validation schema using Zod

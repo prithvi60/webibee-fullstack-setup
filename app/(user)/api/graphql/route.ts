@@ -2,9 +2,9 @@ import { ApolloServer } from "@apollo/server";
 import { startServerAndCreateNextHandler } from "@as-integrations/next";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../prisma/db";
-import { typeDefs } from "@/lib/TypeDefs";
-import { resolvers } from "@/lib/Resolvers";
-import { getUserFromToken } from "@/lib/GetUserInfo";
+import { typeDefs } from "@/utils/TypeDefs";
+import { resolvers } from "@/utils/Resolvers";
+import { getUserFromToken } from "@/utils/GetUserInfo";
 
 // Initialize Apollo Server
 const server = new ApolloServer({
