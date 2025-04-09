@@ -60,34 +60,6 @@ To establish a basic connection from Prisma to Neon, follow these steps:
 
     ```
 
-6.  **Update Your Prisma Client Instance**
-
-        Create or update a [prisma/db.ts] file with the following code to configure the Prisma Client with the Neon serverless driver:
-
-        ```typescript
-            import ws from "ws";
-
-            import { PrismaClient } from "@prisma/client";
-            import { PrismaNeon } from "@prisma/adapter-neon";
-            import { Pool, neonConfig } from "@neondatabase/serverless";
-
-            const globalForPrisma = global as unknown as {
-            prisma: PrismaClient;
-            };
-
-            neonConfig.webSocketConstructor = ws;
-
-            const connectionString = `${process.env.DATABASE_URL}`;
-            const pool = new Pool({ connectionString });
-            const adapter = new PrismaNeon(pool);
-            const prisma = globalForPrisma.prisma || new PrismaClient({ adapter });
-
-            if (process.env.NODE_ENV === "development") globalForPrisma.prisma = prisma;
-
-            export default prisma;
-
-        ```
-
 ## Additional Resources
 
 For more details, refer to the official documentation:
