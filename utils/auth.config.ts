@@ -2,43 +2,18 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import jwt, { Jwt } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import type { NextAuthConfig } from "next-auth";
-import type { User, Session } from "next-auth";
 import prisma from "@/prisma/db";
+import type { PrismaClient } from "@prisma/client";
 
-// Type for user with extra properties
-interface CustomUser extends User {
-  accessToken?: string;
-}
-
-// Type for token with extended properties
-interface CustomToken extends Jwt {
-  id?: string;
-  accessToken?: string;
-}
-
-// Extended session type
-interface CustomSession extends Session {
-  user: {
-    id?: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-    accessToken?: string;
-  };
-  accessToken?: string;
-}
-
-// Make sure JWT_SECRET is defined
+// Make sure environment variables are defined
 const JWT_SECRET = process.env.AUTH_SECRET;
-
 if (!JWT_SECRET) {
   throw new Error("AUTH_SECRET is not defined in environment variables");
 }
-if (!process.env.DATABASE_URL)
-  throw new Error("DATABASE_URL is not defined");
+
 // Generate JWT for credentials-based authentication
 const generateToken = (user: { id: number; email: string }): string => {
   return jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
@@ -47,10 +22,7 @@ const generateToken = (user: { id: number; email: string }): string => {
 };
 
 // Authenticate user with email and password
-const authenticateUser = async (
-  email: string,
-  password: string
-): Promise<CustomUser | null> => {
+const authenticateUser = async (email: string, password: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
 
   if (
@@ -72,7 +44,8 @@ const authenticateUser = async (
 };
 
 // Auth.js v5 configuration
-export const authConfig: NextAuthConfig = {
+export const authConfig = {
+  // adapter: PrismaAdapter(prisma as PrismaClient),
   providers: [
     Google,
     Credentials({
@@ -88,8 +61,9 @@ export const authConfig: NextAuthConfig = {
           }
 
           const user = await authenticateUser(
-            credentials.email as string,
-            credentials.password as string
+            // @ts-expect-error - credentials.email and credentials.password are defined
+            credentials.email,
+            credentials.password
           );
 
           if (!user) {
@@ -111,9 +85,8 @@ export const authConfig: NextAuthConfig = {
   session: { strategy: "jwt", maxAge: 24 * 60 * 60 },
   secret: JWT_SECRET,
   pages: {
-    signIn: "/sign-in", // Custom login page
+    signIn: "/sign-in",
   },
-//   adapter: PrismaAdapter(prisma),
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === "google") {
@@ -140,42 +113,33 @@ export const authConfig: NextAuthConfig = {
       }
       return true;
     },
-    async redirect({ url, baseUrl }) {
-      return url.startsWith(baseUrl) ? url : baseUrl;
-    },
-    // @ts-ignore
-    async jwt({ token, user, account }): Promise<CustomToken> {
+    async jwt({ token, user, account }) {
       // Initial sign in
       if (user) {
         token.id = user.id;
         if ("accessToken" in user) {
-          token.accessToken = (user as CustomUser).accessToken;
+          token.accessToken = user.accessToken;
         }
       }
 
-      // If using Google provider, handle token differently
-      if (account && account.provider === "google" && account.access_token) {
+      // For Google OAuth
+      if (account?.provider === "google" && account.access_token) {
         token.accessToken = account.access_token;
       }
 
-      return token as unknown as CustomToken;
+      return token;
     },
     async session({ session, token }) {
-      const customSession = session as CustomSession;
-
       if (token) {
-        customSession.user = {
-          id: token.id as string,
-          name: token.name,
-          email: token.email,
-          image: token.picture,
-          accessToken: token.accessToken as string | undefined,
-        };
+        session.user.id = token.id as string;
+        // @ts-expect-error - We're adding accessToken to the session user
+        session.user.accessToken = token.accessToken;
       }
-
-      return customSession;
+      return session;
     },
   },
-  // debug: true,
-};
+  debug: process.env.NODE_ENV !== "production",
+} satisfies NextAuthConfig;
 
+// Create Auth.js handler
+export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
