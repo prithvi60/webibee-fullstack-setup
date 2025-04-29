@@ -24,6 +24,7 @@ const schema = z
             .string()
             .min(10, "Phone number must be at least 10 digits")
             .max(10, "Phone number must not exceed 10 digits"),
+        // role: z.enum(["user", "admin"]),
         address: z.string().min(10, "Address is required"),
         password: z
             .string()
@@ -70,7 +71,7 @@ export const SignUpForm = () => {
         // console.log("submitted", data);
 
         try {
-            const { data: result } = await signUp({ variables: { ...data } });
+            const { data: result } = await signUp({ variables: { ...data, role: "user" } });
 
             if (result) {
                 reset()
@@ -201,6 +202,28 @@ export const SignUpForm = () => {
                                     </span>
                                 )}
                             </div>
+                            {/* Role */}
+                            {/* <div className="relative">
+                                <div className="flex gap-3 items-center">
+                                    <label className="w-[45%] md:w-[30%] block font-medium text-[#1E318D] text-lg md:text-xl">
+                                        Role
+                                    </label>
+                                    <div className="relative grow">
+                                        <select
+                                            className="w-full border border-stroke bg-transparent py-2 pl-6 pr-10 text-[#1E318D] outline-hidden focus:border-blue-700 focus-visible:shadow-none"
+                                            {...register("role")}
+                                        >
+                                            <option value="user">User</option>
+                                            <option value="admin">Admin</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                {errors.role && (
+                                    <div className="absolute -bottom-6 left-0 w-full text-xs md:text-xl text-red-500 font-semibold text-center mt-1">
+                                        {errors.role.message}
+                                    </div>
+                                )}
+                            </div> */}
                             {/* Address */}
                             <div className="relative">
                                 <div className="flex gap-3 items-center">

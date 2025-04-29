@@ -14,7 +14,7 @@ export const navLinks = [
             { menu: "service 2", link: "/services/service-2" },
         ],
     },
-    { menu: "blog", link: "/blog" },
+    // { menu: "blog", link: "/blog" },
 ];
 
 export const footerLinks1 = [

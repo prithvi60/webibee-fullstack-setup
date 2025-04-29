@@ -9,6 +9,7 @@ type User {
   phone_number: String
   address: String
   image: String
+  role: String
   token: String
 }
 
@@ -24,6 +25,7 @@ type Mutation {
     email: String!,
     phone_number: String!,
     address: String,
+    role: String,
     password: String!,
     confirmPassword: String!
   ): User

@@ -1,7 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
-  // output          = "./generated/client"
 }
 
 datasource db {
@@ -17,6 +16,7 @@ model User {
   phone_number  String?
   address       String?
   image         String?
+  role          String?
   emailVerified DateTime? @map("email_verified")
   Account       Account[]
   Session       Session[]

@@ -21,6 +21,7 @@ interface UserSignUp {
   name: string;
   phone_number: string;
   address?: string;
+  role?: string;
   password: string;
   confirmPassword: string;
 }
@@ -98,6 +99,7 @@ export const resolvers = {
         email,
         phone_number,
         address,
+        role,
         password,
         confirmPassword,
       }: UserSignUp
@@ -128,6 +130,7 @@ export const resolvers = {
             password: hashedPwd,
             phone_number,
             address,
+            role
           },
         });
 

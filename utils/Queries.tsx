@@ -8,6 +8,7 @@ export const SIGN_UP = gql`
     $email: String!
     $phone_number: String!
     $address: String!
+    $role: String
     $password: String!
     $confirmPassword: String!
   ) {
@@ -16,12 +17,14 @@ export const SIGN_UP = gql`
       email: $email
       phone_number: $phone_number
       address: $address
+      role: $role
       password: $password
       confirmPassword: $confirmPassword
     ) {
       id
       name
       email
+      role
     }
   }
 `;
@@ -44,6 +47,7 @@ export const GET_USER = gql`
       id
       phone_number
       name
+      role
     }
   }
 `;

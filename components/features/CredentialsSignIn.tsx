@@ -125,7 +125,7 @@ export const CredentialsSignIn = () => {
     <form
       action={credentialsAction}
       // onSubmit={handleSubmit(onSubmit)}
-      className="px-4 sm:px-12.5 xl:px-17.5 space-y-7 relative"
+      className="px-4 md:px-6 space-y-7 relative"
     >
       <div className="mb-4 relative">
         <label htmlFor="credentials-email" className="mb-2.5 block font-medium text-[#1E318D]">

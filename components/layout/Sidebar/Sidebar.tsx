@@ -16,6 +16,8 @@ import useLocalStorage from "@/utils/useLocalStorage";
 import { IoIosArrowDropleftCircle } from "react-icons/io";
 import { ImProfile } from "react-icons/im";
 import { GoOrganization } from "react-icons/go";
+import { SiWebmoney } from "react-icons/si";
+
 // import TwoD from "../../public/logo/2d.svg";
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -27,10 +29,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const [search, setSearch] = useState<string>("");
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const { data: session } = useSession();
+  const userName = session?.user?.name;
 
   const menuGroups = [
     {
-      name: "Ensileta Info",
+      name: "webibee Info",
       menuItems: [
         {
           icon: (
@@ -39,9 +42,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             </div>
           ),
           label: "Your Profile",
-          route: "/dashboard/profile",
+          route: "/dashboard/your-profile",
         },
-        {
+        session?.user?.role === "admin" && {
           icon: (
             <div className="p-1 rounded-md bg-black">
               <GoOrganization className="text-4xl sm:text-5xl text-white" />
@@ -50,7 +53,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           label: "Organisation",
           route: "/dashboard/organisation",
         },
-        {
+        session?.user?.role === "user" && {
+          icon: (
+            <div className="p-1 rounded-md bg-black">
+              <SiWebmoney className="text-4xl sm:text-5xl text-white" />
+            </div>
+          ),
+          label: "Pricing",
+          route: "/dashboard/pricing",
+        },
+        session?.user?.role === "user" && {
           icon: (
             <div className="p-1 rounded-md bg-black">
               <IoCallSharp className="text-4xl sm:text-5xl text-white" />
@@ -66,7 +78,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   return (
     <>
       {/* <!-- Hamburger Toggle BTN --> */}
-      {!sidebarOpen && (
+      {/* {!sidebarOpen && (
         <div className="z-30 absolute block top-6 left-6 h-10 lg:relative lg:hidden">
           <button
             aria-controls="sidebar"
@@ -110,9 +122,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           className="fixed h-full w-full top-0 left-0 z-10 bg-black/30 backdrop-blur-lg lg:hidden transition-all duration-300 ease-linear"
           onClick={() => setSidebarOpen(!sidebarOpen)}
         ></div>
-      )}
+      )} */}
       <aside
-        className={`absolute z-20 top-0 left-0 lg:static lg:flex h-screen w-72.5 flex-col overflow-y-hidden bg-white shadow-2xl duration-300 ease-linear lg:translate-x-0 gap-4 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        className={`absolute z-[1001] top-0 left-0 lg:static lg:flex h-screen w-72.5 flex-col overflow-y-hidden bg-white shadow-2xl duration-300 ease-linear lg:translate-x-0 gap-4 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
       >
         <button type="button" onClick={() => setSidebarOpen(!sidebarOpen)} className="absolute top-6 right-3 z-50 lg:hidden p-1 cursor-pointer rounded-full border border-stroke bg-white shadow-sm">
@@ -122,9 +134,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         <div className="flex flex-col gap-8 px-6 pt-5.5 pb-3.5 lg:pb-4.5 lg:pt-6.5">
           <>
             <div className="space-y-1 text-black relative">
-              <h2 className="text-2xl capitalize font-semibold tracking-wider">{`Hi, userName`}</h2>
+              <h2 className="text-2xl capitalize font-semibold tracking-wider">{`Hi, ${userName || "Welcome"}`}</h2>
               <p className="absolute -bottom-7 left-0 text-sm md:text-base tracking-wide capitalize font-medium transition-all duration-700 ease-in">
-                {"ABC"}
+                {session?.user?.email || ""}
               </p>
             </div>
             {/* )} */}

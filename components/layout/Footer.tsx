@@ -1,11 +1,13 @@
+"use client"
 import Link from "next/link";
 import { footerLinks1, footerLinks2, socialLinks } from "@/utils/Data";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 const Footer = () => {
-
+    const pathName = usePathname()
     return (
-        <footer className={`padding relative space-y-6 md:space-y-10 w-full`}>
+        <footer className={`${pathName.startsWith("/dashboard") ? "hidden" : "block"} padding relative space-y-6 md:space-y-10 w-full`}>
             <div
                 className={`absolute -z-10 h-full inset-0 bg-radial from-gradient-1 to-gradient-2 sm:h-64 blur-3xl opacity-20 rounded-full rotate-[4deg] w-[90%] sm:m-auto`}
             />

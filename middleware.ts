@@ -1,7 +1,8 @@
+import NextAuth from "next-auth";
+import { authConfig } from "./utils/auth.config";
 
-import NextAuth from "next-auth"
-import { authConfig } from "./utils/auth.config"
- 
-// 1. Use middleware directly
-export const { auth: middleware } = NextAuth(authConfig)
- 
+export default NextAuth(authConfig).auth;
+
+export const config = {
+  matcher: ["/dashboard", "/services/:path*", "/blog/:path*"],
+};
