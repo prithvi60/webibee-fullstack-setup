@@ -1,14 +1,14 @@
 import DefaultLayout from "@/components/layout/Layout/DefaultLayout";
+import OrganisationList from "@/components/layout/OrganisationList";
+import PricingCard from "@/components/UI/PricingCard";
 import React from "react";
-import UploadForm from "../../../../components/features/UploadForm";
 
 const Page = () => {
     return (
         <DefaultLayout>
             <div className="flex flex-col justify-center items-center p-8 pb-20 gap-16 text-xl md:text-5xl sm:p-10 h-screen">
-                <h4>Profile</h4>
-                <h1 className="text-2xl mb-8">Upload File to Google Drive</h1>
-                <UploadForm />
+                <h4>Organisation</h4>
+                <OrganisationList />
             </div>
         </DefaultLayout>
     );
