@@ -16,7 +16,7 @@
     "@hookform/resolvers": "^5.0.1",
     "@neondatabase/serverless": "^1.0.0",
     "@prisma/adapter-neon": "^6.6.0",
-    "@prisma/client": "^6.6.0",
+    "@prisma/client": "^6.7.0",
     "@sanity/image-url": "^1.1.0",
     "@sanity/vision": "^3.80.1",
     "@stripe/react-stripe-js": "^3.6.0",
@@ -30,6 +30,7 @@
     "next-auth": "^5.0.0-beta.25",
     "next-sanity": "^9.9.5",
     "nodemailer": "^6.10.0",
+    "prisma": "^6.7.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.55.0",
@@ -60,7 +61,6 @@
     "@typescript-eslint/parser": "^8.29.0",
     "eslint": "^9",
     "eslint-config-next": "15.2.3",
-    "prisma": "^6.5.0",
     "tailwindcss": "^4",
     "typescript": "^5.8.2"
   }

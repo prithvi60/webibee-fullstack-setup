@@ -53,6 +53,9 @@ export const resolvers = {
       try {
         const user = await prisma.user.findUnique({
           where: { id: userId },
+          include: {
+            UploadedFile: true,
+          }
         });
 
         if (!user) {
@@ -67,7 +70,11 @@ export const resolvers = {
     },
     users: async () => {
       try {
-        const users = await prisma.user.findMany();
+        const users = await prisma.user.findMany({
+          include: {
+            UploadedFile: true,
+          }
+        });
         return users;
       } catch (error) {
         console.error("Error while fetching users:", error);
@@ -89,7 +96,24 @@ export const resolvers = {
         console.error("Error while fetching user by email:", error);
         throw new Error("Failed to fetch user");
       }
-    }
+    },
+    getUploadedFiles: async (_: any, __: any, { userId }: { userId: string }) => {
+      if (!userId) {
+        throw new Error("Unauthorized");
+      }
+      try {
+        const user = await prisma.uploadedFile.findMany({
+          where: {
+            userId: userId,
+          },
+        });
+
+        return user;
+      } catch (error) {
+        console.error("Error while fetching user:", error);
+        throw new Error("Failed to fetch user");
+      }
+    },
   },
   Mutation: {
     signUp: async (
@@ -176,9 +200,33 @@ export const resolvers = {
       }
     },
     logout: async () => {
-      // Since JWT is stateless, server-side logout is just returning true
-      // The client will handle removing the token from storage
       return true;
-    }
+    },
+    uploadFile: async (
+      _: any,
+      {
+        fileUrl,
+        filename,
+        userId,
+      }: { fileUrl: string; filename: string; userId: string }
+    ) => {
+      // Find the latest version of the file with the same filename for the user
+      const existingFile = await prisma.uploadedFile.findMany();
+
+      // Determine the new version number
+      const newVersion = existingFile.length;
+
+      const createdFile = await prisma.uploadedFile.create({
+        data: {
+          filename,
+          fileUrl,
+          version: newVersion,
+          createdAt: new Date(),
+          userId,
+        },
+      });
+
+      return createdFile;
+    },
   },
 };

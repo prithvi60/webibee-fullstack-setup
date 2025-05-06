@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import toast from "react-hot-toast";
 import Loader from "../UI/Loader";
+import { useRouter } from "next/navigation";
 
 
 const schema = z.object({
@@ -18,7 +19,7 @@ type FormFields = z.infer<typeof schema>;
 
 export const CredentialsSignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
-
+  const router = useRouter();
   const {
     register,
     // handleSubmit,
@@ -27,72 +28,47 @@ export const CredentialsSignIn = () => {
     resolver: zodResolver(schema),
     mode: "onBlur",
   });
-  // const onSubmit: SubmitHandler<FormFields> = async (data) => {
 
-  //   const returnUrl = typeof window !== 'undefined'
-  //     ? localStorage.getItem('returnUrl') || '/'
-  //     : '/';
-
-  //   // console.log("returnUrl", returnUrl)
-  //   try {
-  //     const result = await signIn("credentials", {
-  //       redirect: false,
-  //       ...data
-  //     });
-
-  //     if (result?.error) {
-  //       setError("root", { message: result.error });
-  //       toast.error(result.error, {
-  //         position: "top-right",
-  //         duration: 3000,
-  //         style: {
-  //           border: "1px solid #EB1C23",
-  //           padding: "16px",
-  //           color: "#EB1C23",
-  //         },
-  //         iconTheme: {
-  //           primary: "#EB1C23",
-  //           secondary: "#FFFAEE",
-  //         },
-  //       });
-  //     } else if (result?.ok) {
-  //       reset();
-  //       // Wait for the session to be updated
-  //       await new Promise((resolve) => setTimeout(resolve, 100));
-
-  //       if (returnUrl) {
-  //         localStorage.removeItem("returnUrl");
-  //         window.location.href = returnUrl;
-  //       } else {
-  //         window.location.href = "/";
-  //       }
-  //       toast.success("Logged in successfully", {
-  //         position: "top-right",
-  //         duration: 3000,
-  //         style: {
-  //           border: "1px solid #499d49",
-  //           padding: "16px",
-  //           color: "#499d49",
-  //         },
-  //         iconTheme: {
-  //           primary: "#499d49",
-  //           secondary: "#FFFAEE",
-  //         },
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error("An unexpected error occurred:", error);
-  //     const errorMessage = (error as Error).message;
-  //     setError("root", { message: errorMessage });
-  //     toast.error(errorMessage);
-  //   }
-  //   return null;
-  // };
   const credentialsAction = async (formData: FormData) => {
     const data = Object.fromEntries(formData.entries());
-    const result = await signIn("credentials", data, { callbackUrl: "/" });
-    if (result?.error) {
-      toast.error(result.error, {
+    try {
+      const result = await signIn("credentials", {
+        ...data,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        toast.error(result.error, {
+          position: "top-right",
+          duration: 3000,
+          style: {
+            border: "1px solid #EB1C23",
+            padding: "16px",
+            color: "#EB1C23",
+          },
+          iconTheme: {
+            primary: "#EB1C23",
+            secondary: "#FFFAEE",
+          },
+        });
+      } else {
+        toast.success("Logged in successfully", {
+          position: "top-right",
+          duration: 3000,
+          style: {
+            border: "1px solid #499d49",
+            padding: "16px",
+            color: "#499d49",
+          },
+          iconTheme: {
+            primary: "#499d49",
+            secondary: "#FFFAEE",
+          },
+        });
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred", {
         position: "top-right",
         duration: 3000,
         style: {
@@ -105,22 +81,9 @@ export const CredentialsSignIn = () => {
           secondary: "#FFFAEE",
         },
       });
-    } else if (result?.ok) {
-      toast.success("Logged in successfully", {
-        position: "top-right",
-        duration: 3000,
-        style: {
-          border: "1px solid #499d49",
-          padding: "16px",
-          color: "#499d49",
-        },
-        iconTheme: {
-          primary: "#499d49",
-          secondary: "#FFFAEE",
-        },
-      });
     }
-  }
+  };
+
   return (
     <form
       action={credentialsAction}

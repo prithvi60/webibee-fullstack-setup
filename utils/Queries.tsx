@@ -48,6 +48,57 @@ export const GET_USER = gql`
       phone_number
       name
       role
+      UploadedFile {
+        id
+        filename
+        fileUrl
+      }
+    }
+  }
+`;
+
+export const GET_USERS = gql`
+  query Users {
+    users {
+      id
+      name  
+      email
+      phone_number
+      address
+      role
+      UploadedFile {
+        id
+        filename
+        fileUrl
+      }
+    }
+  }
+`;
+
+// upload file
+
+export const CREATE_UPLOAD_FILE = gql`
+  mutation UploadFile($fileUrl: String!, $filename: String!, $userId: String!) {
+    uploadFile(fileUrl: $fileUrl, filename: $filename, userId: $userId) {
+      id
+      filename
+      fileUrl
+      userId
+      version
+      createdAt
+    }
+  }
+`;
+
+export const GET_UPLOAD_FILE = gql`
+  query GetUploadedFiles {
+    getUploadedFiles {
+      id
+      filename
+      fileUrl
+      userId
+      version
+      createdAt
     }
   }
 `;

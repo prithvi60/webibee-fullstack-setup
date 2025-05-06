@@ -23,7 +23,10 @@ export async function POST(req: Request) {
     const auth = new google.auth.GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_DRIVE_CLIENT_EMAIL,
-        private_key: process.env.GOOGLE_DRIVE_PRIVATE_KEY,
+        private_key: process.env.GOOGLE_DRIVE_PRIVATE_KEY?.replace(
+          /\\n/g,
+          "\n"
+        ),
       },
       scopes: ["https://www.googleapis.com/auth/drive"],
     });
@@ -69,9 +72,26 @@ export async function POST(req: Request) {
       },
     });
 
+    // List files in the specified folder
+    const response = await drive.files.list({
+      q: `'${folderId}' in parents and trashed=false`,
+      fields: "files(id, name, mimeType)",
+    });
+
+    const files = response.data.files || [];
+
+    // Generate public URLs for each file
+    const fileUrls = files.map((file) => ({
+      id: file.id,
+      name: file.name,
+      url: `https://drive.google.com/uc?id=${file.id}`,
+      mimeType: file.mimeType,
+    }));
+
     return NextResponse.json({
       message: "File uploaded successfully",
       fileId: fileId,
+      fileURL: fileUrls.find((f) => f.id === fileId)?.url,
     });
   } catch (error) {
     console.error("Error uploading file:", error);

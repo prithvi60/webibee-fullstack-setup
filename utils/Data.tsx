@@ -6,21 +6,21 @@ import {
 
 export const navLinks = [
     { menu: "home", link: "/" },
-    { menu: "about", link: "/about" },
-    {
-        menu: "services",
-        subMenus: [
-            { menu: "service 1", link: "/services/service-1" },
-            { menu: "service 2", link: "/services/service-2" },
-        ],
-    },
-    // { menu: "blog", link: "/blog" },
+    { menu: "contact us", link: "/contact" },
+    { menu: "pricing", link: "/pricing" },
+    // {
+    //     menu: "services",
+    //     subMenus: [
+    //         { menu: "service 1", link: "/services/service-1" },
+    //         { menu: "service 2", link: "/services/service-2" },
+    //     ],
+    // },
 ];
 
 export const footerLinks1 = [
     { menu: "Home", href: "/" },
-    { menu: "About", href: "/about" },
     { menu: "Contact Us", href: "/contact" },
+    { menu: "Pricing", href: "/pricing" },
 ];
 
 export const footerLinks2 = [

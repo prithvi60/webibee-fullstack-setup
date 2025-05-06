@@ -11,12 +11,22 @@ type User {
   image: String
   role: String
   token: String
+  UploadedFile: [UploadedFile]
 }
+type UploadedFile {
+    id: String
+    filename: String
+    fileUrl: String
+    version: Int
+    userId: String
+    createdAt: String
+  }
 
 type Query {
   user: User
   users: [User]
   getUser(email: String!): User
+  getUploadedFiles: [UploadedFile!]!
 }
 
 type Mutation {
@@ -29,9 +39,8 @@ type Mutation {
     password: String!,
     confirmPassword: String!
   ): User
-  
   login(email: String!, password: String!): User!
-  
   logout: Boolean!
+  uploadFile(fileUrl: String!, filename: String!, userId: String!) : UploadedFile!
 }
 `;

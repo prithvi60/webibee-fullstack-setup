@@ -21,7 +21,7 @@ const SidebarItem = ({ item, pageName, setPageName, companyName }: any) => {
       pageName !== companyName ? companyName : "";
     setPageName(updatedPageName);
     // router.push(`/portal/dashboard/${updatedPageName.replace(/\s/g, "_")}`);
-    router.push(`/portal/dashboard/${encodeURIComponent(updatedPageName)}`);
+    router.push(`/dashboard/${encodeURIComponent(updatedPageName)}`);
   }
 
   const pathname = usePathname();
@@ -46,9 +46,9 @@ const SidebarItem = ({ item, pageName, setPageName, companyName }: any) => {
   return (
     <>
       {item === "" ? (
-        <li className={` ${pageName === companyName ? "bg-blue-900 " : ""} flex items-center gap-2.5  hover:bg-blue-900/50 cursor-pointer`}>
+        <li className={` ${pageName === companyName ? "bg-black text-white " : ""} flex items-center gap-2.5  hover:bg-black/50 cursor-pointer`}>
           <div className="p-1 rounded-md bg-secondary">
-            <SiVorondesign className="text-4xl sm:text-5xl text-white" />
+            <SiVorondesign className="text-4xl sm:text-5xl text-black" />
           </div>
           <div
             // href={hrefValue}

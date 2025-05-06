@@ -41,15 +41,12 @@ const Footer = () => {
                                     key={idx}
                                     className={`text-sm capitalize md:text-base tracking-wide font-medium`}
                                 >
-                                    <Link title={list.menu} href={list.href}>{list.menu}</Link>
+                                    <Link title={list.menu} href={list.href || "#"}>{list.menu}</Link>
                                 </li>
                             ))}
                         </ul>
                     </div>
-                    <div className="block space-y-3">
-                        {/* <h4 className="text-lg font-medium capitalize tracking-wider md:text-xl">
-                            Topics & Types
-                        </h4> */}
+                    {/* <div className="block space-y-3">
                         <ul className="block space-y-2.5 md:space-y-4">
                             {footerLinks2.map((list, idx) => (
                                 <li
@@ -60,7 +57,7 @@ const Footer = () => {
                                 </li>
                             ))}
                         </ul>
-                    </div>
+                    </div> */}
                 </div>
             </div>
             <div className={`flex flex-col justify-center items-center lg:flex-row lg:justify-between gap-8 font-medium`}>

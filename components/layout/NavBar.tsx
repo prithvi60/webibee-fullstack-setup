@@ -5,7 +5,6 @@ import DesktopMenu from "../UI/DesktopMenu";
 import MobMenu from "../UI/MobMenu";
 import { navLinks } from "@/utils/Data";
 import Image from "next/image";
-import { GetStartButton } from "../UI/Button";
 import { SignOut } from "./sign-out";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -38,15 +37,22 @@ const NavBar = () => {
             ))}
           </ul>
           <div className="flex items-center gap-3 lg:hidden">
-            <GetStartButton text={"contact us"} href={"/contact"} />
             {session?.user ? (
-              <SignOut />
+              <>
+                <Link
+                  href="/dashboard"
+                  className="py-2 px-3 cursor-pointer bg-black text-white rounded text-sm md:text-base"
+                >
+                  Dashboard
+                </Link>
+                <SignOut />
+              </>
             ) : (
               <Link
                 href="/sign-in"
                 className="py-2 px-3 cursor-pointer bg-black text-white rounded text-sm md:text-base"
               >
-                Sign In
+                Dashboard
               </Link>
             )}
           </div>
@@ -56,16 +62,23 @@ const NavBar = () => {
             </div>
           </div>
         </div>
-        <div className="hidden lg:!flex items-center gap-3 ">
-          <GetStartButton text={"contact us"} href={"/contact"} />
+        <div className="hidden lg:!flex items-center gap-3">
           {session?.user ? (
-            <SignOut />
+            <>
+              <Link
+                href="/dashboard"
+                className="py-2 px-3 cursor-pointer bg-black text-white rounded text-sm md:text-base"
+              >
+                Dashboard
+              </Link>
+              <SignOut />
+            </>
           ) : (
             <Link
               href="/sign-in"
               className="py-2 px-3 cursor-pointer bg-black text-white rounded text-sm md:text-base"
             >
-              Sign In
+              Dashboard
             </Link>
           )}
         </div>

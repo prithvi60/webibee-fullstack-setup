@@ -3,7 +3,7 @@ import { CredentialsSignIn } from "./CredentialsSignIn";
 
 const SignInForm = async () => {
   return (
-    <div className="w-full max-w-sm mx-auto space-y-6 border-2 p-6 rounded-lg shadow-lg">
+    <div className="relative w-full max-w-sm mx-auto space-y-6 border-2 p-6 rounded-lg shadow-lg">
       <h1 className="text-2xl font-bold text-center mb-6">Sign In</h1>
 
       {/* <GithubSignIn />
