@@ -3,6 +3,7 @@ import { FaPhone } from "react-icons/fa6";
 import { CiMail } from "react-icons/ci";
 import { ContactForm } from "@/components/features/ContactForm";
 
+
 const Contact = () => {
     return (
         <section className="w-full relative padding flex flex-col gap-20 md:gap-0 md:flex-row items-start justify-between max-w-5xl mx-auto">

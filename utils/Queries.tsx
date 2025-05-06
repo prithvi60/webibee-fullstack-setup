@@ -70,6 +70,7 @@ export const GET_USERS = gql`
         id
         filename
         fileUrl
+        version
       }
     }
   }

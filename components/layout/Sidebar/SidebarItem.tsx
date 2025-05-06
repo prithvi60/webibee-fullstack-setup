@@ -36,13 +36,6 @@ const SidebarItem = ({ item, pageName, setPageName, companyName }: any) => {
 
   const isItemActive = isActive(item);
 
-  // console.log(pageName);
-  // useEffect(() => {
-  //   setHrefValue(`/portal/dashboard/${pageName.replace(/\s/g, "_")}`);
-  // }, [pageName]);
-
-  // replace(/_/g, " ")
-
   return (
     <>
       {item === "" ? (

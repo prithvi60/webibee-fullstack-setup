@@ -15,11 +15,10 @@ interface UploadFileResponse {
     };
 }
 
-export default function UploadForm({ userId }: { userId: string | undefined }) {
+export default function UploadForm({ userId, userName, email }: { userId: string | undefined, userName: string | undefined, email: string | undefined }) {
     const [file, setFile] = useState<File | null>(null);
     const [message, setMessage] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    console.log(typeof userId, userId);
 
     const [uploadFile] = useMutation<UploadFileResponse>(CREATE_UPLOAD_FILE);
 
@@ -56,11 +55,12 @@ export default function UploadForm({ userId }: { userId: string | undefined }) {
             });
 
             const result = await response.json();
-            console.log(result.fileUrl, result.fileId, file.name);
+
 
             if (!result.fileURL || !result.fileId || !file.name) {
                 throw new Error("Invalid server response: Missing fileUrl or fileId");
             }
+
 
             if (response.ok) {
                 const { data, errors } = await uploadFile({
@@ -75,6 +75,30 @@ export default function UploadForm({ userId }: { userId: string | undefined }) {
                         errors?.[0]?.message || "Failed to save file metadata to database"
                     );
                 }
+
+                const emailResponse = await fetch("/api/sendMail", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        name: userName,
+                        email,
+                        fileUrl: result.fileURL,
+                        title: "File Upload",
+                        message: ""
+                    }),
+                });
+
+                await emailResponse.json();
+
+                if (!emailResponse.ok) {
+                    const errorData = await emailResponse.text();
+                    throw new Error(
+                        `Email API Error: ${emailResponse.status} ${errorData}`
+                    );
+                }
+
                 setMessage(`File uploaded successfully! File ID: ${result.fileId}`);
             }
         } catch (error) {

@@ -19,6 +19,7 @@ interface EmailRequestBody {
   email: string;
   message: string;
   title: string;
+  fileUrl: string;
 }
 
 interface MailOptions {
@@ -30,7 +31,8 @@ interface MailOptions {
 }
 
 export async function POST(req: Request): Promise<Response> {
-  const { name, email, message, title }: EmailRequestBody = await req.json();
+  const { name, email, message, title, fileUrl }: EmailRequestBody =
+    await req.json();
 
   const capitalized: string = title.charAt(0).toUpperCase() + title.slice(1);
 
@@ -47,6 +49,15 @@ export async function POST(req: Request): Promise<Response> {
                 `
                 : ""
             }
+                ${
+                  fileUrl !== ""
+                    ? `
+              <p style="font-size: 16px; color: #555;">
+                <strong>File URL:</strong> ${fileUrl}
+              </p>
+                `
+                    : ""
+                }
   `;
 
   const messageForUser: string = `
@@ -77,8 +88,10 @@ export async function POST(req: Request): Promise<Response> {
   };
 
   try {
-    // Send acknowledgment email to the customer
-    await transporter.sendMail(userMailOptions);
+    if (title === "contact") {
+      // Send acknowledgment email to the customer
+      await transporter.sendMail(userMailOptions);
+    }
 
     // Send detailed email to the client
     await transporter.sendMail(clientMailOptions);

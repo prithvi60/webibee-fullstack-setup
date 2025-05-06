@@ -18,8 +18,7 @@ export function generateEmailTemplateForUser(mainContent: string, title: string)
         }
            
             <p style="font-size: 16px;">
-                Cheers!<br>
-                Poornima T M,<br>
+                Webibee,<br>
                 <a href="mailto:support@Business-Portfolio.com" style="color: #007bff; text-decoration: none;">support@Business-Portfolio.com</a><br>
                 Founder & C.E.O,
             </p>
@@ -46,8 +45,7 @@ export function generateEmailTemplateForClient(mainContent: string) {
               ${mainContent}
               <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
               <p style="font-size: 16px;">
-                Cheers!<br>
-                Poornima T M,<br>
+                Webibee,<br>
                 <a href="mailto:support@Business-Portfolio.com" style="color: #007bff; text-decoration: none;">support@Business-Portfolio.com</a><br>
                 Founder & C.E.O,
             </p>
