@@ -13,11 +13,12 @@ model User {
   name          String         @db.VarChar(100)
   email         String         @unique @db.VarChar(50)
   password      String?
-  phone_number  String?
+  phone_number  String         @unique
   address       String?
   image         String?
   role          String?
   emailVerified DateTime?      @map("email_verified")
+  phoneVerified DateTime?      @map("phone_verified")
   Account       Account[]
   Session       Session[]
   UploadedFile  UploadedFile[]

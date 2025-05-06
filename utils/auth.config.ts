@@ -4,6 +4,7 @@ import type { NextAuthConfig, User } from "next-auth";
 declare module "next-auth" {
   interface User {
     role?: string;
+    phone_number?: string;
   }
 }
 import Google from "next-auth/providers/google";
@@ -20,7 +21,7 @@ export const authConfig = {
     Google,
     Credentials({
       credentials: {
-        email: { label: "Email", type: "email" },
+        identifier: { label: "Email or Phone Number", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
@@ -55,6 +56,7 @@ export const authConfig = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.phone_number = user.phone_number;
         if ("accessToken" in user) {
           token.accessToken = user.accessToken;
         }
@@ -71,6 +73,7 @@ export const authConfig = {
       if (token) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.phone_number = token.phone_number as string | undefined;
         // @ts-expect-error - accessToken is added dynamically
         session.user.accessToken = token.accessToken;
       }

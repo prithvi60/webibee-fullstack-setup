@@ -175,11 +175,18 @@ export const resolvers = {
     },
     login: async (
       _: unknown,
-      { email, password }: { email: string; password: string }
+      { identifier, password }: { identifier: string; password: string }
     ) => {
       try {
         // Check if user exists
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { email: identifier },
+              { phone_number: identifier },
+            ],
+          }
+        });
         if (!user) {
           throw new Error("Invalid email or password");
         }

@@ -4,7 +4,7 @@ import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 import prisma from "@/prisma/db";
 import { authConfig } from "./auth.config";
 
@@ -19,6 +19,7 @@ const generateToken = (user: {
   id: string;
   email: string;
   role: string;
+  phone_number?: string;
 }): string => {
   return jwt.sign(
     { id: user.id, email: user.email, role: user.role },
@@ -30,15 +31,18 @@ const generateToken = (user: {
 };
 
 // Authenticate user with email and password
-const authenticateUser = async (email: string, password: string) => {
-  const user = await prisma.user.findUnique({
-    where: { email },
+const authenticateUser = async (identifier: string, password: string) => {
+  const isEmail = identifier.includes("@");
+
+  const user = await prisma.user.findFirst({
+    where: isEmail ? { email: identifier } : { phone_number: identifier },
     select: {
       id: true,
       name: true,
       email: true,
       password: true,
       role: true,
+      phone_number: true,
     },
   });
 
@@ -51,10 +55,12 @@ const authenticateUser = async (email: string, password: string) => {
       id: user.id.toString(),
       name: user.name,
       email: user.email,
+      phone_number: user.phone_number,
       role: user.role || "user",
       accessToken: generateToken({
         id: user.id.toString(),
         email: user.email,
+        phone_number: user.phone_number,
         role: user.role || "user",
       }),
     };
@@ -72,25 +78,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
     Credentials({
       credentials: {
-        email: { label: "Email", type: "email" },
+        identifier: { label: "Email or Phone Number", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         try {
-          if (!credentials?.email || !credentials?.password) {
+          if (!credentials?.identifier || !credentials?.password) {
             console.error("Authorization failed: Missing email or password");
             return null;
           }
 
           const user = await authenticateUser(
-            credentials.email as string,
+            credentials.identifier as string,
             credentials.password as string
           );
 
           if (!user) {
             console.error(
               "Authorization failed: Invalid email or password for",
-              credentials.email
+              credentials.identifier
             );
             return null;
           }
@@ -113,6 +119,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             select: {
               id: true,
               role: true,
+              phone_number: true,
             },
           });
 
@@ -122,17 +129,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 name: user.name!,
                 email: user.email!,
                 image: user.image,
-                // role: "user",s
+                phone_number: "",
               },
               select: {
                 id: true,
                 role: true,
+                phone_number: true,
               },
             });
           }
 
           user.id = dbUser.id.toString();
           user.role = dbUser.role || "user";
+          user.phone_number = dbUser.phone_number;
         } catch (error) {
           console.error("Error handling Google sign in:", error);
           return false;
@@ -145,6 +154,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.id = user.id;
         token.role = user.role; // Make sure role is included
+        token.phone_number = user.phone_number;
         if ("accessToken" in user) {
           token.accessToken = user.accessToken;
         }
@@ -163,6 +173,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.role = token.role as string; // Ensure role is included
         // @ts-expect-error - accessToken is added dynamically
         session.user.accessToken = token.accessToken as string;
+        session.user.phone_number = token.phone_number as string | undefined;
       }
       return session;
     },

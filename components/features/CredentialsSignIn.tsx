@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 
 
 const schema = z.object({
-  email: z.string().email("Invalid email address"),
+  identifier: z.string().min(1, "Email or phone number is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 type FormFields = z.infer<typeof schema>;
@@ -19,10 +19,12 @@ type FormFields = z.infer<typeof schema>;
 
 export const CredentialsSignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [rootError, setRootError] = useState("");
   const router = useRouter();
   const {
     register,
     // handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
@@ -51,6 +53,8 @@ export const CredentialsSignIn = () => {
             secondary: "#FFFAEE",
           },
         });
+        console.error(result.error);
+        setRootError("Invalid email or password");
       } else {
         toast.success("Logged in successfully", {
           position: "top-right",
@@ -81,31 +85,32 @@ export const CredentialsSignIn = () => {
           secondary: "#FFFAEE",
         },
       });
+      console.error(error);
+      setRootError("Invalid email or password");
     }
   };
 
   return (
     <form
       action={credentialsAction}
-      // onSubmit={handleSubmit(onSubmit)}
       className="px-4 md:px-6 space-y-7 relative"
     >
       <div className="mb-4 relative">
         <label htmlFor="credentials-email" className="mb-2.5 block font-medium text-[#1E318D]">
-          Email
+          Email or Phone Number
         </label>
         <div className="relative">
           <input
-            type="email"
+            type="text"
             id="credentials-email"
             placeholder="Enter your email"
             className="w-full border border-stroke bg-transparent py-2 pl-6 pr-10 text-[#1E318D] outline-hidden focus:border-primary focus-visible:shadow-none"
-            {...register("email")}
+            {...register("identifier")}
           />
         </div>
-        {errors.email && (
+        {errors.identifier && (
           <div className="absolute -bottom-7 left-0 w-full text-xs md:text-base text-red-500 font-semibold text-center mt-1">
-            {errors.email.message}
+            {errors.identifier.message}
           </div>
         )}
       </div>
@@ -193,6 +198,11 @@ export const CredentialsSignIn = () => {
       {errors.root && (
         <div className="absolute -bottom-6 text-lg md:text-xl w-full left-1/2 -translate-x-1/2 text-red-500 font-semibold text-center mt-5">
           {errors.root.message}
+        </div>
+      )}
+      {rootError && (
+        <div className="absolute -bottom-6 text-base md:text-xl w-full left-1/2 -translate-x-1/2 text-red-500 font-semibold text-center mt-5">
+          {rootError}
         </div>
       )}
     </form>

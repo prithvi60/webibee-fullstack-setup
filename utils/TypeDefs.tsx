@@ -6,7 +6,7 @@ type User {
   id: String!
   name: String!
   email: String!
-  phone_number: String
+  phone_number: String!
   address: String
   image: String
   role: String
@@ -39,7 +39,7 @@ type Mutation {
     password: String!,
     confirmPassword: String!
   ): User
-  login(email: String!, password: String!): User!
+  login(identifier:String!, email: String!,phone_number: String!, password: String!): User!
   logout: Boolean!
   uploadFile(fileUrl: String!, filename: String!, userId: String!) : UploadedFile!
 }

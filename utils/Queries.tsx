@@ -25,16 +25,18 @@ export const SIGN_UP = gql`
       name
       email
       role
+      phone_number
     }
   }
 `;
 
 export const LOGIN = gql`
-  mutation login($email: String!, $password: String!) {
-    login(email: $email, password: $password) {
+  mutation login($identifier: String!, $password: String!) {
+    login(identifier: $identifier, password: $password) {
       id
       name
       email
+      phone_number
     }
   }
 `;
