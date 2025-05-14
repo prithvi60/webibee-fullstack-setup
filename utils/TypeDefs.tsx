@@ -22,6 +22,29 @@ type UploadedFile {
     createdAt: String
   }
 
+  type Otp {
+  id: ID!
+  email: String!
+  otp: String! # Numeric OTP
+  expiresAt: String!
+  verified: Boolean!
+  createdAt: String!
+}
+
+type GenerateOtpResponse {
+  success: Boolean!
+  message: String
+  otp: String
+  expiresAt: String
+}
+
+type VerifyOtpResponse {
+  success: Boolean!
+  message: String
+  token: String
+  user: User 
+}
+
 type Query {
   user: User
   users: [User]
@@ -42,5 +65,7 @@ type Mutation {
   login(identifier:String!, email: String!,phone_number: String!, password: String!): User!
   logout: Boolean!
   uploadFile(fileUrl: String!, filename: String!, userId: String!) : UploadedFile!
+  generateOtp(email: String!): GenerateOtpResponse!
+  verifyOtp(email: String!, otp: String!): VerifyOtpResponse!
 }
 `;

@@ -8,7 +8,7 @@ import { z } from "zod";
 import toast from "react-hot-toast";
 import Loader from "../UI/Loader";
 import { useRouter } from "next/navigation";
-
+import { OTPLogin } from "./OTPLogin";
 
 const schema = z.object({
   identifier: z.string().min(1, "Email or phone number is required"),
@@ -16,63 +16,52 @@ const schema = z.object({
 });
 type FormFields = z.infer<typeof schema>;
 
-
 export const CredentialsSignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [isPasswordLogin, setIsPasswordLogin] = useState(false);
   const [rootError, setRootError] = useState("");
   const router = useRouter();
+
   const {
     register,
-    // handleSubmit,
-    setError,
+    handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
     mode: "onBlur",
   });
 
-  const credentialsAction = async (formData: FormData) => {
-    const data = Object.fromEntries(formData.entries());
+  const onSubmit = async (data: FormFields) => {
     try {
+      setRootError("");
       const result = await signIn("credentials", {
-        ...data,
+        identifier: data.identifier,
+        credential: data.password,
+        method: "password",
         redirect: false,
       });
 
       if (result?.error) {
-        toast.error(result.error, {
-          position: "top-right",
-          duration: 3000,
-          style: {
-            border: "1px solid #EB1C23",
-            padding: "16px",
-            color: "#EB1C23",
-          },
-          iconTheme: {
-            primary: "#EB1C23",
-            secondary: "#FFFAEE",
-          },
-        });
-        console.error(result.error);
-        setRootError("Invalid email or password");
-      } else {
-        toast.success("Logged in successfully", {
-          position: "top-right",
-          duration: 3000,
-          style: {
-            border: "1px solid #499d49",
-            padding: "16px",
-            color: "#499d49",
-          },
-          iconTheme: {
-            primary: "#499d49",
-            secondary: "#FFFAEE",
-          },
-        });
-        router.push("/dashboard");
+        throw new Error(result.error);
       }
-    } catch (error) {
-      toast.error("An unexpected error occurred", {
+
+      toast.success("Logged in successfully", {
+        position: "top-right",
+        duration: 3000,
+        style: {
+          border: "1px solid #499d49",
+          padding: "16px",
+          color: "#499d49",
+        },
+        iconTheme: {
+          primary: "#499d49",
+          secondary: "#FFFAEE",
+        },
+      });
+      router.push("/dashboard");
+    } catch (error: any) {
+      setRootError(error.message || "Invalid email or password");
+      toast.error(error.message || "Invalid email or password", {
         position: "top-right",
         duration: 3000,
         style: {
@@ -85,14 +74,28 @@ export const CredentialsSignIn = () => {
           secondary: "#FFFAEE",
         },
       });
-      console.error(error);
-      setRootError("Invalid email or password");
     }
   };
 
+  if (!isPasswordLogin) {
+    return (
+      <div className="px-4 md:px-6 space-y-7">
+        <OTPLogin />
+        <div className="text-center">
+          <button
+            onClick={() => setIsPasswordLogin(true)}
+            className="text-blue-600 hover:underline font-medium cursor-pointer"
+          >
+            Login with Password instead
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <form
-      action={credentialsAction}
+      onSubmit={handleSubmit(onSubmit)}
       className="px-4 md:px-6 space-y-7 relative"
     >
       <div className="mb-4 relative">
@@ -104,7 +107,7 @@ export const CredentialsSignIn = () => {
             type="text"
             id="credentials-email"
             placeholder="Enter your email"
-            className="w-full border border-stroke bg-transparent py-2 pl-6 pr-10 text-[#1E318D] outline-hidden focus:border-primary focus-visible:shadow-none"
+            className="w-full border border-stroke bg-transparent py-2 px-2 rounded-lg text-[#1E318D] outline-hidden focus:border-primary focus-visible:shadow-none"
             {...register("identifier")}
           />
         </div>
@@ -195,16 +198,20 @@ export const CredentialsSignIn = () => {
         {isSubmitting ? <Loader /> : "Log In"}
       </button>
 
-      {errors.root && (
-        <div className="absolute -bottom-6 text-lg md:text-xl w-full left-1/2 -translate-x-1/2 text-red-500 font-semibold text-center mt-5">
-          {errors.root.message}
-        </div>
-      )}
+      <div className="text-center">
+        <button
+          onClick={() => setIsPasswordLogin(false)}
+          className="text-blue-600 hover:underline font-medium"
+        >
+          Login with OTP instead
+        </button>
+      </div>
+
       {rootError && (
         <div className="absolute -bottom-6 text-base md:text-xl w-full left-1/2 -translate-x-1/2 text-red-500 font-semibold text-center mt-5">
           {rootError}
         </div>
       )}
     </form>
-  )
-}
+  );
+};

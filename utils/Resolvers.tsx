@@ -3,8 +3,13 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Context } from "@apollo/client";
 import prisma from "@/prisma/db";
+import otpGenerator from 'otp-generator';
+import { formatExpiryTime } from "@/components/features/formatExpiryTime";
+import { sendOtpEmail } from "@/components/features/sendOtpEmail";
+
 
 const JWT_SECRET = process.env.AUTH_SECRET;
+const OTP_EXPIRY_MINUTES = 10;
 
 if (!JWT_SECRET) {
   throw new Error("AUTH_SECRET is not defined in environment variables");
@@ -235,5 +240,118 @@ export const resolvers = {
 
       return createdFile;
     },
+    generateOtp: async (_: any, { email }: { email: string }) => {
+      try {
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          throw new Error("Invalid email format");
+        }
+
+        // Check if user exists in the database
+        const user = await prisma.user.findUnique({
+          where: { email },
+        });
+        if (!user) {
+          throw new Error("Email not registered");
+        }
+        // Invalidate any existing unverified OTPs
+        await prisma.otp.updateMany({
+          where: { email, verified: false },
+          data: { expiresAt: new Date() },
+        });
+
+        // Generate 6-digit numeric OTP
+        const otpCode = otpGenerator.generate(6, {
+          digits: true,
+          lowerCaseAlphabets: false,
+          upperCaseAlphabets: false,
+          specialChars: false
+        });
+
+        const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+
+        await prisma.otp.create({
+          data: {
+            email,
+            otp: otpCode,
+            expiresAt,
+          },
+        });
+        const expiryTime = formatExpiryTime(expiresAt.toISOString());
+        await sendOtpEmail(email, otpCode, expiryTime);
+        return {
+          success: true,
+          message: 'OTP generated successfully && OTP sent to your email',
+          otp: otpCode,
+          expiresAt: expiresAt.toISOString(),
+        };
+      } catch (error) {
+        console.error('OTP generation error:', error);
+        return {
+          success: false,
+          message: 'Failed to generate OTP, Invalid Email Id',
+          otp: null,
+          expiresAt: null,
+        };
+      }
+    },
+    verifyOtp: async (_: any, { email, otp }: { email: string, otp: string }) => {
+      try {
+        const otpRecord = await prisma.otp.findFirst({
+          where: { email },
+          orderBy: { createdAt: 'desc' },
+        });
+
+        if (!otpRecord) {
+          return { success: false, message: 'No OTP found for this email' };
+        }
+
+        if (otpRecord.verified) {
+          return { success: false, message: 'OTP already used' };
+        }
+
+        if (new Date() > otpRecord.expiresAt) {
+          return { success: false, message: 'OTP expired' };
+        }
+
+        if (otpRecord.otp !== otp) {
+          return { success: false, message: 'Invalid OTP' };
+        }
+
+        // Mark as verified
+        await prisma.otp.update({
+          where: { id: otpRecord.id },
+          data: { verified: true },
+        });
+
+        // Check if user exists (login flow)
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (user) {
+          // Update verification status
+          await prisma.user.update({
+            where: { email },
+            data: { emailVerified: new Date() },
+          });
+
+          // Generate auth token
+          const token = generateToken(user);
+          return {
+            success: true,
+            message: 'OTP verified successfully',
+            token,
+            user,
+          };
+        }
+
+      } catch (error) {
+        console.error('OTP verification error:', error);
+        return {
+          success: false,
+          message: 'Failed to verify OTP',
+        };
+      }
+    },
   },
 };
+

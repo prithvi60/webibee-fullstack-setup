@@ -79,4 +79,18 @@ model UploadedFile {
   createdAt DateTime @default(now())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("uploaded_files")
+}
+
+model Otp {
+  id        String   @id @default(cuid())
+  email     String   @db.VarChar(50)
+  otp       String // Numeric OTP
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@map("otps")
 }

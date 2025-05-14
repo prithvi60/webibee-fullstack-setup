@@ -1,10 +1,22 @@
 import type { NextAuthConfig, User } from "next-auth";
 
 // Extend the User type to include the role property
+// Extend the User type to include the role property
 declare module "next-auth" {
   interface User {
     role?: string;
     phone_number?: string;
+    authMethod?: "password" | "otp";
+    accessToken?: string;
+  }
+
+  interface Session {
+    user: {
+      id: string;
+      role?: string;
+      phone_number?: string;
+      accessToken?: string;
+    };
   }
 }
 import Google from "next-auth/providers/google";
@@ -44,9 +56,9 @@ export const authConfig = {
         nextUrl.pathname.startsWith("/blog");
 
       if (isProtectedRoute && !isLoggedIn) {
-        return false; // Redirect to sign-in page
+        return Response.redirect(new URL("/sign-in", nextUrl));
       }
-      if (!isProtectedRoute && isLoggedIn) {
+      if (!isProtectedRoute && isLoggedIn && nextUrl.pathname === "/sign-in") {
         return Response.redirect(new URL("/dashboard", nextUrl));
       }
       return true;
@@ -63,9 +75,9 @@ export const authConfig = {
       }
 
       // For Google provider, add access token if available
-      if (account?.provider === "google" && account.access_token) {
-        token.accessToken = account.access_token;
-      }
+      // if (account?.provider === "google" && account.access_token) {
+      //   token.accessToken = account.access_token;
+      // }
 
       return token;
     },

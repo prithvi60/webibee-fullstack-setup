@@ -105,3 +105,16 @@ export const GET_UPLOAD_FILE = gql`
     }
   }
 `;
+
+// Generate OTP
+
+export const GENERATE_OTP = gql`
+  mutation GenerateOtp($email: String!) {
+    generateOtp(email: $email) {
+      success
+      message
+      otp
+      expiresAt
+    }
+  }
+`;

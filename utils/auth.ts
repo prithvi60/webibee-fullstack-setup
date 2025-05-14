@@ -15,25 +15,33 @@ if (!JWT_SECRET) {
 }
 
 // Generate JWT for credentials-based authentication
-const generateToken = (user: {
+export const generateToken = (user: {
   id: string;
   email: string;
-  role: string;
+  role?: string;
   phone_number?: string;
-}): string => {
+}) => {
   return jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
-    JWT_SECRET,
     {
-      expiresIn: "1d",
-    }
+      userId: user.id,
+      email: user.email,
+      role: user.role || "user",
+      phone_number: user.phone_number || null,
+    },
+    JWT_SECRET,
+    { expiresIn: "1d" }
   );
 };
 
-// Authenticate user with email and password
-const authenticateUser = async (identifier: string, password: string) => {
+// Authenticate user with email and password or Email and OTP
+const authenticateUser = async (
+  identifier: string,
+  credential: string,
+  method: "password" | "otp"
+) => {
   const isEmail = identifier.includes("@");
 
+  // Find user by email or phone
   const user = await prisma.user.findFirst({
     where: isEmail ? { email: identifier } : { phone_number: identifier },
     select: {
@@ -43,20 +51,62 @@ const authenticateUser = async (identifier: string, password: string) => {
       password: true,
       role: true,
       phone_number: true,
+      emailVerified: true,
     },
   });
 
-  if (
-    user &&
-    user.password &&
-    (await bcrypt.compare(password, user.password))
-  ) {
+  if (!user) return null;
+
+  if (method === "password") {
+    // Password authentication
+    if (user.password && (await bcrypt.compare(credential, user.password))) {
+      return {
+        id: user.id.toString(),
+        name: user.name,
+        email: user.email,
+        phone_number: user.phone_number,
+        role: user.role || "user",
+        authMethod: "password" as const,
+        accessToken: generateToken({
+          id: user.id.toString(),
+          email: user.email,
+          phone_number: user.phone_number,
+          role: user.role || "user",
+        }),
+      };
+    }
+  } else if (method === "otp") {
+    // OTP authentication
+    const otpRecord = await prisma.otp.findFirst({
+      where: { email: user.email },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!otpRecord || otpRecord.otp !== credential) return null;
+    if (otpRecord.verified) return null;
+    if (new Date() > otpRecord.expiresAt) return null;
+
+    // Mark OTP as verified
+    await prisma.otp.update({
+      where: { id: otpRecord.id },
+      data: { verified: true },
+    });
+
+    // Update email verification status if not already verified
+    if (!user.emailVerified) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: new Date() },
+      });
+    }
+
     return {
       id: user.id.toString(),
       name: user.name,
       email: user.email,
       phone_number: user.phone_number,
       role: user.role || "user",
+      authMethod: "otp" as const,
       accessToken: generateToken({
         id: user.id.toString(),
         email: user.email,
@@ -65,6 +115,7 @@ const authenticateUser = async (identifier: string, password: string) => {
       }),
     };
   }
+
   return null;
 };
 
@@ -75,27 +126,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      allowDangerousEmailAccountLinking: true,
     }),
     Credentials({
+      name: "credentials",
       credentials: {
-        identifier: { label: "Email or Phone Number", type: "text" },
-        password: { label: "Password", type: "password" },
+        identifier: { label: "Email or Phone", type: "text" },
+        credential: { label: "Password or OTP", type: "password" },
+        method: { label: "Method", type: "text" },
       },
       async authorize(credentials) {
         try {
-          if (!credentials?.identifier || !credentials?.password) {
-            console.error("Authorization failed: Missing email or password");
+          if (
+            !credentials?.identifier ||
+            !credentials?.credential ||
+            !credentials?.method
+          ) {
+            console.error("Authorization failed: Missing required fields");
             return null;
           }
 
           const user = await authenticateUser(
             credentials.identifier as string,
-            credentials.password as string
+            credentials.credential as string,
+            credentials.method as "password" | "otp"
           );
 
           if (!user) {
             console.error(
-              "Authorization failed: Invalid email or password for",
+              `Authorization failed: Invalid ${credentials.method === "password" ? "password" : "OTP"} for`,
               credentials.identifier
             );
             return null;
@@ -111,49 +170,44 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
-    async signIn({ user, account }) {
-      if (account?.provider === "google") {
-        try {
-          let dbUser = await prisma.user.findUnique({
-            where: { email: user.email! },
-            select: {
-              id: true,
-              role: true,
-              phone_number: true,
-            },
-          });
+    // async signIn({ user, account, profile }) {
+    //   // Handle Google OAuth
+    //   // if (account?.provider === "google") {
+    //   //   try {
+    //   //     // Check if user exists
+    //   //     let dbUser = await prisma.user.findUnique({
+    //   //       where: { email: user.email! },
+    //   //     });
 
-          if (!dbUser) {
-            dbUser = await prisma.user.create({
-              data: {
-                name: user.name!,
-                email: user.email!,
-                image: user.image,
-                phone_number: "",
-              },
-              select: {
-                id: true,
-                role: true,
-                phone_number: true,
-              },
-            });
-          }
+    //   //     // If user doesn't exist, create them
+    //   //     if (!dbUser) {
+    //   //       dbUser = await prisma.user.create({
+    //   //         data: {
+    //   //           name: user.name!,
+    //   //           email: user.email!,
+    //   //           image: user.image,
+    //   //           emailVerified: new Date(),
+    //   //         },
+    //   //       });
+    //   //     }
 
-          user.id = dbUser.id.toString();
-          user.role = dbUser.role || "user";
-          user.phone_number = dbUser.phone_number;
-        } catch (error) {
-          console.error("Error handling Google sign in:", error);
-          return false;
-        }
-      }
-      return true;
-    },
+    //   //     // Update the user object with database values
+    //   //     user.id = dbUser.id.toString();
+    //   //     user.role = dbUser.role || "user";
+    //   //     user.phone_number = dbUser.phone_number || "";
+    //   //   } catch (error) {
+    //   //     console.error("Error handling Google sign in:", error);
+    //   //     return false;
+    //   //   }
+    //   // }
+
+    //   return true;
+    // },
     async jwt({ token, user, account }) {
       // Initial sign-in
       if (user) {
         token.id = user.id;
-        token.role = user.role; // Make sure role is included
+        token.role = user.role;
         token.phone_number = user.phone_number;
         if ("accessToken" in user) {
           token.accessToken = user.accessToken;
@@ -170,10 +224,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id as string;
-        session.user.role = token.role as string; // Ensure role is included
-        // @ts-expect-error - accessToken is added dynamically
-        session.user.accessToken = token.accessToken as string;
+        session.user.role = token.role as string;
         session.user.phone_number = token.phone_number as string | undefined;
+        session.user.accessToken = token.accessToken as string;
       }
       return session;
     },
