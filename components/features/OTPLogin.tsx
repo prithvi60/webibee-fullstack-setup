@@ -49,13 +49,14 @@ export const OTPLogin = () => {
     const onEmailSubmit = async (data: EmailFields) => {
         try {
             setError("");
+            setEmail(data.email);
+            setStep("otp");
+            resetEmailForm();
             const { data: result } = await generateOtp({
                 variables: { email: data.email },
             });
 
             if (result.generateOtp.success) {
-                setEmail(data.email);
-                setStep("otp");
                 resetEmailForm();
                 toast.success("OTP sent to your email", {
                     position: "top-right",
@@ -166,14 +167,14 @@ export const OTPLogin = () => {
                     </div>
 
                     <button
-                        disabled={loading}
+                        // disabled={loading}
                         type="submit"
                         className={`w-full cursor-pointer rounded-md p-2 text-white bg-blue-700 transition bg-success font-semibold ${loading
                             ? "bg-opacity-40 cursor-not-allowed"
                             : "hover:bg-opacity-90"
                             }`}
                     >
-                        {loading ? <Loader /> : "Send OTP"}
+                        {"Send OTP"}
                     </button>
                 </form>
             ) : (
@@ -206,9 +207,9 @@ export const OTPLogin = () => {
                         <button
                             disabled={loading}
                             type="submit"
-                            className="w-full cursor-pointer rounded-md p-2.5 text-white bg-blue-700 transition bg-success font-semibold hover:bg-opacity-90"
+                            className="w-full cursor-pointer rounded-md p-2.5 text-white bg-blue-700 transition bg-success font-semibold hover:bg-opacity-90 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                            {loading ? <Loader /> : "Verify OTP"}
+                            {"Verify OTP"}
                         </button>
                     </div>
                 </form>
