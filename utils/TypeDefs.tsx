@@ -31,6 +31,14 @@ type UploadedFile {
   createdAt: String!
 }
 
+  type Subscription {
+  id: ID!
+  email: String!
+  expiresAt: String!
+  verified: Boolean!
+  createdAt: String!
+}
+
 type GenerateOtpResponse {
   success: Boolean!
   message: String
@@ -45,11 +53,18 @@ type VerifyOtpResponse {
   user: User 
 }
 
+type SubscriptionResponse {
+  success: Boolean!
+  message: String
+  expiresAt: String 
+}
+
 type Query {
   user: User
   users: [User]
   getUser(email: String!): User
   getUploadedFiles: [UploadedFile!]!
+  getSubscribedUserByEmail(email: String!): Subscription
 }
 
 type Mutation {
@@ -67,5 +82,6 @@ type Mutation {
   uploadFile(fileUrl: String!, filename: String!, userId: String!) : UploadedFile!
   generateOtp(email: String!): GenerateOtpResponse!
   verifyOtp(email: String!, otp: String!): VerifyOtpResponse!
+  subscribePlan(email: String!): SubscriptionResponse!
 }
 `;

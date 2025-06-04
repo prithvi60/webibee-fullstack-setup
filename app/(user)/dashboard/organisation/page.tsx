@@ -1,6 +1,5 @@
 import DefaultLayout from "@/components/layout/Layout/DefaultLayout";
 import OrganisationList from "@/components/layout/OrganisationList";
-import PricingCard from "@/components/UI/PricingCard";
 import React from "react";
 
 const Page = () => {

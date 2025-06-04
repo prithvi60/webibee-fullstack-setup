@@ -118,3 +118,27 @@ export const GENERATE_OTP = gql`
     }
   }
 `;
+
+// subscription
+
+export const SUBSCRIBE_PLAN_MUTATION = gql`
+mutation SubscribePlan($email: String!) {
+  subscribePlan(email: $email) {
+    success
+    message
+    expiresAt
+  }
+}
+`;
+
+export const GET_SUBSCRIBED_USER = gql`
+  query GetSubscribedUserByEmail($email: String!) {
+    getSubscribedUserByEmail(email: $email) {
+      id
+      email
+      expiresAt
+      verified
+      createdAt
+    }
+  }
+`;

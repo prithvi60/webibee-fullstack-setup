@@ -146,7 +146,7 @@ export const OTPLogin = () => {
                     <div className="mb-4 relative">
                         <label
                             htmlFor="otp-email"
-                            className="mb-2.5 block font-medium text-[#1E318D]"
+                            className="mb-2.5 block font-medium text-black"
                         >
                             Email Address
                         </label>
@@ -155,7 +155,7 @@ export const OTPLogin = () => {
                                 type="email"
                                 id="otp-email"
                                 placeholder="Enter your email"
-                                className="w-full border border-stroke bg-transparent py-2 px-2 rounded-lg text-[#1E318D] outline-hidden focus:border-primary focus-visible:shadow-none"
+                                className="w-full border border-stroke bg-transparent py-2 px-2 rounded-lg text-black outline-hidden focus:border-primary focus-visible:shadow-none"
                                 {...registerEmail("email")}
                             />
                         </div>
@@ -182,7 +182,7 @@ export const OTPLogin = () => {
                     <div className="mb-4 relative">
                         <label
                             htmlFor="otp-code"
-                            className="mb-2.5 block font-medium text-[#1E318D]"
+                            className="mb-2.5 block font-medium text-black"
                         >
                             Enter OTP
                         </label>
@@ -191,7 +191,7 @@ export const OTPLogin = () => {
                                 type="text"
                                 id="otp-code"
                                 placeholder="Enter 6-digit OTP"
-                                className="w-full border border-stroke bg-transparent py-2 px-2 rounded-lg text-[#1E318D] outline-hidden focus:border-primary focus-visible:shadow-none"
+                                className="w-full border border-stroke bg-transparent py-2 px-2 rounded-lg text-black outline-hidden focus:border-primary focus-visible:shadow-none"
                                 {...registerOtp("otp")}
                             />
                         </div>

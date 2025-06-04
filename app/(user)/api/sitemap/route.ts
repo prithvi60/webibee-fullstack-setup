@@ -27,12 +27,12 @@ export async function GET() {
 
   try {
     // Fetch dynamic routes from Sanity CMS with error handling
-    const posts = await client.fetch(
-      `*[_type == "post"]{ "url": slug.current }`
-    );
-    interface Post {
-      url: string;
-    }
+    // const posts = await client.fetch(
+    //   `*[_type == "post"]{ "url": slug.current }`
+    // );
+    // interface Post {
+    //   url: string;
+    // }
 
     interface Link {
       url: string;
@@ -41,14 +41,14 @@ export async function GET() {
       lastmod?: string;
     }
 
-    posts.forEach((post: Post) => {
-      links.push({
-      url: `/resources/blog/${post.url}`,
-      changefreq: "weekly",
-      priority: 0.9,
-      lastmod: new Date().toISOString(),
-      } as Link);
-    });
+    // posts.forEach((post: Post) => {
+    //   links.push({
+    //   url: `/resources/blog/${post.url}`,
+    //   changefreq: "weekly",
+    //   priority: 0.9,
+    //   lastmod: new Date().toISOString(),
+    //   } as Link);
+    // });
 
     const hostname = "https://webibee.com";
     if (!hostname) {

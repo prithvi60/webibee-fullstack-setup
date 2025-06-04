@@ -1,9 +1,7 @@
-import Image from "next/image";
-import Link from "next/link";
 import React from "react";
 
 interface Post {
-    slug: { current: string };
+    // slug: { current: string };
     imageUrl: string;
     imageAlt: string;
     blogShortRead: string;
@@ -11,7 +9,7 @@ interface Post {
 }
 
 const Blogs = ({ posts }: { posts: Post[] }) => {
-    const publishedAt = posts.map((val) => val.publishedAt);
+    // const publishedAt = posts.map((val) => val.publishedAt);
 
     return (
         <section className="padding w-full space-y-24 md:space-y-36">
@@ -19,7 +17,7 @@ const Blogs = ({ posts }: { posts: Post[] }) => {
                 <h4 className="text-3xl sm:text-4xl lg:text-[60px] font-semibold text-center">
                     Read more Interesting Blog
                 </h4>
-                <div className="grid grid-cols-1 max-w-xs mx-auto sm:max-w-full md:grid-cols-2 place-content-center place-items-center xl:grid-cols-3 gap-8">
+                {/* <div className="grid grid-cols-1 max-w-xs mx-auto sm:max-w-full md:grid-cols-2 place-content-center place-items-center xl:grid-cols-3 gap-8">
                     {posts.map((item, idx) => {
                         const formattedDate = new Date(item.publishedAt).toLocaleDateString(
                             "en-US",
@@ -61,7 +59,7 @@ const Blogs = ({ posts }: { posts: Post[] }) => {
                             </Link>
                         );
                     })}
-                </div>
+                </div> */}
             </div>
         </section>
     );

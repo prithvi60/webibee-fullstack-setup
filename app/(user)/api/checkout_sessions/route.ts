@@ -5,7 +5,6 @@ export async function POST(request: Request) {
   try {
     // Parse the request body to get the priceValue
     const { amount, currency, redirectUrl, productName } = await request.json();
-    // console.log(amount, currency, redirectUrl, productName);
 
     // Validate required fields
     if (!amount || !currency || !redirectUrl || !productName) {

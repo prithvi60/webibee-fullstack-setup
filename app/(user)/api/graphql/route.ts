@@ -6,19 +6,21 @@ import { typeDefs } from "@/utils/TypeDefs";
 import { resolvers } from "@/utils/Resolvers";
 import { getUserFromToken } from "@/utils/GetUserInfo";
 
+interface Context {
+  userId: string | null;
+  prisma: typeof prisma;
+}
+
 // Initialize Apollo Server
-const server = new ApolloServer({
+const server = new ApolloServer<Context>({
   typeDefs,
   resolvers,
 });
 
 // Context for Apollo Server
-const createContext = async (req: NextRequest) => {
+const createContext = async (req: NextRequest): Promise<Context> => {
   try {
-    // Get authorization header and properly handle it
     const authHeader = req.headers.get("authorization") || "";
-
-    // Only attempt to get user if we have a token
     let userId = null;
     if (authHeader) {
       const user = getUserFromToken(authHeader);
@@ -36,9 +38,12 @@ const createContext = async (req: NextRequest) => {
 };
 
 // Create base handler with explicit typing
-const baseHandler = startServerAndCreateNextHandler<NextRequest>(server, {
-  context: createContext,
-});
+const baseHandler = startServerAndCreateNextHandler<NextRequest, Context>(
+  server,
+  {
+    context: createContext,
+  }
+);
 
 // CORS middleware with corrected typing
 async function corsMiddleware(

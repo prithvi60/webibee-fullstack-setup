@@ -1,14 +1,9 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import ClickOutside from "./ClickOutside";
 import SidebarItem from "./SidebarItem";
 import { useSession } from "next-auth/react";
-import { GiCardDraw } from "react-icons/gi";
 import { IoCallSharp, IoPeopleSharp } from "react-icons/io5";
-import { FaFileInvoice, FaQ } from "react-icons/fa6";
-import { SiLibreofficedraw } from "react-icons/si";
-// import { GET_EMPLOYEE, GET_USERS } from "@/lib/Queries";
 import { useQuery } from "@apollo/client";
 import { FaFlipboard } from "react-icons/fa";
 import { MdApproval } from "react-icons/md";

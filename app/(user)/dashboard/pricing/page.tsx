@@ -7,7 +7,7 @@ const Page = () => {
         <DefaultLayout>
             <div className="flex flex-col justify-center items-center p-8 pb-20 gap-16 text-xl md:text-5xl sm:p-10 h-screen">
                 <h4>Pricing</h4>
-                <PricingCard />
+                <PricingCard amount={599} productName={"Business Contract"} />
             </div>
         </DefaultLayout>
     );

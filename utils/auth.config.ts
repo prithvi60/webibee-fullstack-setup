@@ -4,15 +4,19 @@ import type { NextAuthConfig, User } from "next-auth";
 // Extend the User type to include the role property
 declare module "next-auth" {
   interface User {
+    id: string;
+    name?: string | null;
+    email?: string | null;
     role?: string;
     phone_number?: string;
-    authMethod?: "password" | "otp";
     accessToken?: string;
   }
 
   interface Session {
     user: {
       id: string;
+      name?: string | null;
+      email?: string | null;
       role?: string;
       phone_number?: string;
       accessToken?: string;
@@ -69,6 +73,8 @@ export const authConfig = {
         token.id = user.id;
         token.role = user.role;
         token.phone_number = user.phone_number;
+        token.name = user.name;
+        token.email = user.email;
         if ("accessToken" in user) {
           token.accessToken = user.accessToken;
         }
@@ -85,6 +91,8 @@ export const authConfig = {
       if (token) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.name = token.name as string;
+        session.user.email = token.email as string;
         session.user.phone_number = token.phone_number as string | undefined;
         // @ts-expect-error - accessToken is added dynamically
         session.user.accessToken = token.accessToken;

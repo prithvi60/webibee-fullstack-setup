@@ -1,20 +1,33 @@
 "use client"
 import React, { useCallback } from 'react'
 import { loadStripe } from "@stripe/stripe-js";
-const PricingCard = () => {
+import { useMutation } from '@apollo/client';
+import { SUBSCRIBE_PLAN_MUTATION } from '@/utils/Queries';
+import { useSession } from 'next-auth/react';
+const PricingCard = ({ amount, productName, plan }: { amount: number, productName: string, plan?: boolean }) => {
+    const { data: session } = useSession()
+    const [subscribePlan] = useMutation(SUBSCRIBE_PLAN_MUTATION);
     const stripePromise = loadStripe(
         process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
     );
+    const email = session?.user?.email || "";
+    // console.log(email, "email in pricing card");
+
     const handleDownload = useCallback(async () => {
         try {
-            // Redirect to Stripe Checkout
+            // First validate session and email
+            if (!email) {
+                throw new Error("User email not available. Please log in.");
+            }
+
+            // Initialize Stripe
             const stripe = await stripePromise;
             if (!stripe) {
-                console.error("Stripe failed to initialize.");
-                return;
+                throw new Error("Stripe failed to initialize.");
             }
+
             const currentPath = window.location.origin + window.location.pathname;
-            // const thankyouUrl = `${window.location.origin}/thankyou`;
+
             // Create a Checkout Session
             const response = await fetch("/api/checkout_sessions", {
                 method: "POST",
@@ -22,29 +35,47 @@ const PricingCard = () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    amount: 599, // Amount in paise (₹5.99 = 599 paise)
+                    amount,
                     currency: "inr",
                     redirectUrl: currentPath,
-                    productName: "Business Contract",
+                    productName
                 }),
             });
 
             if (!response.ok) {
-                throw new Error("Failed to create Stripe Checkout session");
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Failed to create Stripe Checkout session");
             }
 
             const { sessionId } = await response.json();
 
-            // Redirect to Stripe Checkout
-            const { error } = await stripe!.redirectToCheckout({ sessionId });
+            // If this is a plan subscription, call the mutation
+            if (plan) {
+                const { data, errors } = await subscribePlan({
+                    variables: { email },
+                    onError: (error) => {
+                        console.error("Mutation error:", error);
+                        throw error;
+                    }
+                });
 
-            if (error) {
-                throw error;
+                if (errors) {
+                    throw new Error(errors[0].message);
+                }
+            }
+
+            // Redirect to Stripe Checkout
+            const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
+
+            if (stripeError) {
+                throw stripeError;
             }
         } catch (error) {
-            console.error("Error during Stripe Checkout:", error);
+            console.error("Error during payment process:", error);
+            alert(`Error: ${error instanceof Error ? error.message : 'Something went wrong'}`);
         }
-    }, [stripePromise]);
+    }, [stripePromise, amount, productName, plan, email, subscribePlan]);
+
     return (
         <div className="w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-8">
             <h5 className="mb-4 text-xl font-medium text-gray-500">Standard plan</h5>

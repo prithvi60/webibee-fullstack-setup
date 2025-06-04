@@ -1,16 +1,14 @@
-
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Context } from "@apollo/client";
 import prisma from "@/prisma/db";
-import otpGenerator from 'otp-generator';
+import otpGenerator from "otp-generator";
 import { formatExpiryTime } from "@/components/features/formatExpiryTime";
 import { sendOtpEmail } from "@/components/features/sendOtpEmail";
 
-
 const JWT_SECRET = process.env.AUTH_SECRET;
 const OTP_EXPIRY_MINUTES = 10;
-
+const SUBSCRIPTION_EXPIRY_DAYS = 30;
 if (!JWT_SECRET) {
   throw new Error("AUTH_SECRET is not defined in environment variables");
 }
@@ -60,7 +58,7 @@ export const resolvers = {
           where: { id: userId },
           include: {
             UploadedFile: true,
-          }
+          },
         });
 
         if (!user) {
@@ -78,7 +76,7 @@ export const resolvers = {
         const users = await prisma.user.findMany({
           include: {
             UploadedFile: true,
-          }
+          },
         });
         return users;
       } catch (error) {
@@ -102,7 +100,11 @@ export const resolvers = {
         throw new Error("Failed to fetch user");
       }
     },
-    getUploadedFiles: async (_: any, __: any, { userId }: { userId: string }) => {
+    getUploadedFiles: async (
+      _: any,
+      __: any,
+      { userId }: { userId: string }
+    ) => {
       if (!userId) {
         throw new Error("Unauthorized");
       }
@@ -117,6 +119,22 @@ export const resolvers = {
       } catch (error) {
         console.error("Error while fetching user:", error);
         throw new Error("Failed to fetch user");
+      }
+    },
+    getSubscribedUserByEmail: async (_: unknown, { email }: { email: string }) => {
+      try {
+        const subscribedUser = await prisma.subscription.findFirst({
+          where: { email },
+        });
+
+        if (!subscribedUser) {
+          console.error("Subscribed user not found for email:");
+          // throw new Error("subscribed User not found");
+        }
+        return subscribedUser;
+      } catch (error) {
+        console.error("Error while fetching subscribed user by email:", error);
+        throw new Error("Failed to fetch subscribed user");
       }
     },
   },
@@ -159,7 +177,7 @@ export const resolvers = {
             password: hashedPwd,
             phone_number,
             address,
-            role
+            role,
           },
         });
 
@@ -186,11 +204,8 @@ export const resolvers = {
         // Check if user exists
         const user = await prisma.user.findFirst({
           where: {
-            OR: [
-              { email: identifier },
-              { phone_number: identifier },
-            ],
-          }
+            OR: [{ email: identifier }, { phone_number: identifier }],
+          },
         });
         if (!user) {
           throw new Error("Invalid email or password");
@@ -266,7 +281,7 @@ export const resolvers = {
           digits: true,
           lowerCaseAlphabets: false,
           upperCaseAlphabets: false,
-          specialChars: false
+          specialChars: false,
         });
 
         const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
@@ -282,41 +297,44 @@ export const resolvers = {
         await sendOtpEmail(email, otpCode, expiryTime);
         return {
           success: true,
-          message: 'OTP generated successfully && OTP sent to your email',
+          message: "OTP generated successfully && OTP sent to your email",
           otp: otpCode,
           expiresAt: expiresAt.toISOString(),
         };
       } catch (error) {
-        console.error('OTP generation error:', error);
+        console.error("OTP generation error:", error);
         return {
           success: false,
-          message: 'Failed to generate OTP, Invalid Email Id',
+          message: "Failed to generate OTP, Invalid Email Id",
           otp: null,
           expiresAt: null,
         };
       }
     },
-    verifyOtp: async (_: any, { email, otp }: { email: string, otp: string }) => {
+    verifyOtp: async (
+      _: any,
+      { email, otp }: { email: string; otp: string }
+    ) => {
       try {
         const otpRecord = await prisma.otp.findFirst({
           where: { email },
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: "desc" },
         });
 
         if (!otpRecord) {
-          return { success: false, message: 'No OTP found for this email' };
+          return { success: false, message: "No OTP found for this email" };
         }
 
         if (otpRecord.verified) {
-          return { success: false, message: 'OTP already used' };
+          return { success: false, message: "OTP already used" };
         }
 
         if (new Date() > otpRecord.expiresAt) {
-          return { success: false, message: 'OTP expired' };
+          return { success: false, message: "OTP expired" };
         }
 
         if (otpRecord.otp !== otp) {
-          return { success: false, message: 'Invalid OTP' };
+          return { success: false, message: "Invalid OTP" };
         }
 
         // Mark as verified
@@ -338,20 +356,61 @@ export const resolvers = {
           const token = generateToken(user);
           return {
             success: true,
-            message: 'OTP verified successfully',
+            message: "OTP verified successfully",
             token,
             user,
           };
         }
-
       } catch (error) {
-        console.error('OTP verification error:', error);
+        console.error("OTP verification error:", error);
         return {
           success: false,
-          message: 'Failed to verify OTP',
+          message: "Failed to verify OTP",
+        };
+      }
+    },
+    subscribePlan: async (_: any, { email }: { email: string }) => {
+      try {
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          throw new Error("Invalid email format");
+        }
+
+        // Check if user exists in the database
+        const user = await prisma.user.findUnique({
+          where: { email },
+        });
+        if (!user) {
+          throw new Error("Email not registered");
+        }
+
+        const expiresAt = new Date(
+          Date.now() + SUBSCRIPTION_EXPIRY_DAYS * 24 * 60 * 60 * 1000
+        );
+
+        await prisma.subscription.create({
+          data: {
+            email,
+            verified: true,
+            expiresAt,
+          },
+        });
+        const expiryTime = formatExpiryTime(expiresAt.toISOString());
+        return {
+          success: true,
+          message: "Subscribed successfully",
+          expiresAt: expiryTime,
+        };
+      } catch (error) {
+        console.error("Subscription Failed error:", error);
+        return {
+          success: false,
+          message: "Failed to Subscribe",
+          otp: null,
+          expiresAt: null,
         };
       }
     },
   },
 };
-

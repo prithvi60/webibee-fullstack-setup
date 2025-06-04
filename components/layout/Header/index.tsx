@@ -1,7 +1,5 @@
 import DropdownNotification from "./DropdownNotification";
-import Image from "next/image";
 import { useSession } from "next-auth/react";
-import { MarqueeSb } from "./MarqueeUpdated";
 
 const Header = (props: {
   sidebarOpen: string | boolean | undefined;

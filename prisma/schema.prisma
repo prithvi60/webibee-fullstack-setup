@@ -94,3 +94,11 @@ model Otp {
   @@index([email])
   @@map("otps")
 }
+
+model Subscription {
+  id        String   @id @default(cuid())
+  email     String   @db.VarChar(50)
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

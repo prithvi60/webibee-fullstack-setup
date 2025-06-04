@@ -1,26 +1,11 @@
-// import { BlogSpecificPage } from '@/components/layout/blog page/BlogSpecificPage';
-// import { client } from '@/sanity/lib/client';
-// import { POST_QUERY } from '@/sanity/Queries';
+const Page = () => {
+    // const { slug } = params as { slug: string };
 
-// const Page = async ({ params }: { params: { slug: string } }) => {
-//     const { slug } = await params
+    return (
+        <div>
+            <h4 className="text-3xl font-semibold text-center my-10">blog</h4>
+        </div>
+    );
+}
 
-//     const post = await client.fetch(
-//         POST_QUERY,
-//         { slug },
-//         {
-//             cache: "no-cache",
-//             next: {
-//                 tags: ["post"],
-//             },
-//         }
-//     );
-
-//     return (
-//         <div>
-//             <BlogSpecificPage post={post} />
-//         </div>
-//     )
-// }
-
-// export default Page
+export default Page;

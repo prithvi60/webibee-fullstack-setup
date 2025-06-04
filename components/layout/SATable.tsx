@@ -24,8 +24,8 @@ export const SATable = ({ name }: { name: string }) => {
             setFilteredData(admins);
         }
     }, [name, admins]);
-    console.log(filteredData[0]);
-    console.log(admins);
+    // console.log(filteredData[0]);
+    // console.log(admins);
 
 
     return (
