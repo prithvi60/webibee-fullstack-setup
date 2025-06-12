@@ -34,7 +34,7 @@ if (!JWT_SECRET) {
 
 export const authConfig = {
   providers: [
-    Google,
+    // Google,
     Credentials({
       credentials: {
         identifier: { label: "Email or Phone Number", type: "text" },
@@ -100,5 +100,6 @@ export const authConfig = {
       return session;
     },
   },
-  // debug: process.env.NODE_ENV !== "production",
+  trustHost: true,
+  debug: process.env.NODE_ENV !== "production",
 } satisfies NextAuthConfig;

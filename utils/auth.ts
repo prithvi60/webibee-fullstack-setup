@@ -124,9 +124,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma as PrismaClient),
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      allowDangerousEmailAccountLinking: true,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+          scope: "openid email profile",
+        },
+      },
     }),
     Credentials({
       name: "credentials",
@@ -170,39 +177,50 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
-    // async signIn({ user, account, profile }) {
-    //   // Handle Google OAuth
-    //   // if (account?.provider === "google") {
-    //   //   try {
-    //   //     // Check if user exists
-    //   //     let dbUser = await prisma.user.findUnique({
-    //   //       where: { email: user.email! },
-    //   //     });
+    async signIn({ user, account, profile }) {
+      // Only handle Google provider
+      if (account?.provider === "google") {
+        try {
+          if (!user.email) {
+            console.error("Google account has no email");
+            return "/auth/error?error=no-email";
+          }
 
-    //   //     // If user doesn't exist, create them
-    //   //     if (!dbUser) {
-    //   //       dbUser = await prisma.user.create({
-    //   //         data: {
-    //   //           name: user.name!,
-    //   //           email: user.email!,
-    //   //           image: user.image,
-    //   //           emailVerified: new Date(),
-    //   //         },
-    //   //       });
-    //   //     }
+          // Check if user exists
+          let dbUser = await prisma.user.findUnique({
+            where: { email: user.email },
+          });
 
-    //   //     // Update the user object with database values
-    //   //     user.id = dbUser.id.toString();
-    //   //     user.role = dbUser.role || "user";
-    //   //     user.phone_number = dbUser.phone_number || "";
-    //   //   } catch (error) {
-    //   //     console.error("Error handling Google sign in:", error);
-    //   //     return false;
-    //   //   }
-    //   // }
+          // If user doesn't exist, create them
+          if (!dbUser) {
+            dbUser = await prisma.user.create({
+              data: {
+                name: user.name || profile?.name || "Google User",
+                email: user.email,
+                image: user.image || profile?.picture,
+                role: "user",
+                emailVerified: new Date(),
+                phone_number: user.phone_number || profile?.phone_number || "",
+              },
+            });
+          }
 
-    //   return true;
-    // },
+          // Update the user object with database values
+          user.id = dbUser.id.toString();
+          user.role = dbUser.role || "user";
+          user.phone_number = dbUser.phone_number || "";
+
+          return true;
+        } catch (error) {
+          console.error("Google sign-in error:", error);
+          if (typeof error === "object" && error !== null && "code" in error && (error as any).code === "P2002") {
+            return "/auth/error?error=account-conflict";
+          }
+          return "/auth/error?error=google-auth-failed";
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, account }) {
       // Initial sign-in
       if (user) {

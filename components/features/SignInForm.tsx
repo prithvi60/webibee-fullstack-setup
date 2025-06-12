@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { CredentialsSignIn } from "./CredentialsSignIn";
+import { GithubSignIn } from "../layout/github-sign-in";
 
 const SignInForm = async () => {
   return (
     <div className="relative w-full max-w-sm mx-auto space-y-6 border-2 p-6 rounded-lg shadow-lg">
       <h1 className="text-2xl font-bold text-center mb-6">Sign In</h1>
 
-      {/* <GithubSignIn />
+      <GithubSignIn />
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
@@ -17,7 +18,7 @@ const SignInForm = async () => {
             Or continue with email
           </span>
         </div>
-      </div> */}
+      </div>
 
       <CredentialsSignIn />
       <div className="text-center text-blue-800 text-base md:text-lg">

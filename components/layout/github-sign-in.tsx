@@ -9,7 +9,7 @@ const GithubSignIn = () => {
         await signIn("google", { callbackUrl: "/" });
       }}
     >
-      <button className="w-full text-base md:text-lg px-5 py-2.5 bg-blue-800 flex justify-center text-white hover:bg-opacity-80 rounded-md items-center gap-4" type="submit">
+      <button className="w-full text-base md:text-lg px-5 py-2.5 bg-blue-800 flex justify-center cursor-pointer text-white hover:bg-opacity-80 rounded-md items-center gap-4" type="submit">
         <Google />
         Continue with Google
       </button>
