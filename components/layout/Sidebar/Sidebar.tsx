@@ -3,17 +3,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import SidebarItem from "./SidebarItem";
 import { useSession } from "next-auth/react";
-import { IoCallSharp, IoPeopleSharp } from "react-icons/io5";
+import { IoCallSharp } from "react-icons/io5";
 import { useQuery } from "@apollo/client";
-import { FaFlipboard } from "react-icons/fa";
-import { MdApproval } from "react-icons/md";
 import useLocalStorage from "@/utils/useLocalStorage";
 import { IoIosArrowDropleftCircle } from "react-icons/io";
-import { ImProfile } from "react-icons/im";
-import { GoOrganization } from "react-icons/go";
 import { SiWebmoney } from "react-icons/si";
 import { GET_USERS } from "@/utils/Queries";
-import { TbWorldUpload } from "react-icons/tb";
+import { TbWorldUpload, TbDeviceDesktopAnalytics } from "react-icons/tb";
 
 // import TwoD from "../../public/logo/2d.svg";
 interface SidebarProps {
@@ -83,6 +79,15 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           ),
           label: "Support",
           route: "/dashboard/support",
+        },
+        session?.user?.role === "user" && {
+          icon: (
+            <div className="p-1 rounded-md bg-black">
+              <TbDeviceDesktopAnalytics className="text-4xl sm:text-5xl text-white" />
+            </div>
+          ),
+          label: "Analytics",
+          route: "/dashboard/analytics",
         },
       ].filter(Boolean),
     },

@@ -11,7 +11,10 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
     // Create a basic client without auth for initial render
     const httpLink = new HttpLink({
-        uri: "http://localhost:3000/api/graphql",
+        uri:
+            process.env.NODE_ENV === "development"
+                ? "http://localhost:3000/api/graphql"
+                : "https://mvpdemo.webibee.com/api/graphql",
         credentials: "include",
         headers: {
             "Content-Type": "application/json",

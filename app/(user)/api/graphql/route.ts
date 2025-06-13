@@ -52,7 +52,10 @@ async function corsMiddleware(
 ): Promise<NextResponse> {
   const origin = req.headers.get("origin") || "";
   // Add more allowed origins as needed
-  const allowedOrigins = ["", "http://localhost:3000"];
+  const allowedOrigins = [
+    "https://mvpdemo.webibee.com",
+    "http://localhost:3000",
+  ];
 
   // Handle preflight OPTIONS request
   if (req.method === "OPTIONS") {
