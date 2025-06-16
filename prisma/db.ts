@@ -1,51 +1,36 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { neonConfig } from "@neondatabase/serverless";
-
 import ws from "ws";
-neonConfig.webSocketConstructor = ws;
 
-// To work in edge environments (Cloudflare Workers, Vercel Edge, etc.), enable querying over fetch
-// neonConfig.poolQueryViaFetch = true;
+// Configure Neon for WebSocket and fetch
+neonConfig.webSocketConstructor = ws;
+neonConfig.poolQueryViaFetch = true; // Required for edge environments
+neonConfig.fetchConnectionCache = true; // Cache connections for performance
 
 // Type definitions
 declare global {
   var prisma: PrismaClient | undefined;
 }
 
-const connectionString = `${process.env.DATABASE_URL}`;
+// Ensure DATABASE_URL is loaded
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL is not set in environment variables");
+}
+
+const connectionString = `${process.env.DATABASE_URL}?sslmode=require&connect_timeout=30&pool_timeout=30&connection_limit=10`;
+console.log("Using DATABASE_URL:", connectionString); // Debug log
 
 const adapter = new PrismaNeon({ connectionString });
-const prisma = global.prisma || new PrismaClient({ adapter });
+const prisma =
+  global.prisma ||
+  new PrismaClient({
+    adapter,
+    log: ["query", "info", "warn", "error"], // Enable query logging for debugging
+  });
 
-if (process.env.NODE_ENV === "development") global.prisma = prisma;
+if (process.env.NODE_ENV !== "production") {
+  global.prisma = prisma;
+}
 
 export default prisma;
-
-// import ws from "ws";
-// import { PrismaClient } from "@prisma/client";
-// import { PrismaNeon } from "@prisma/adapter-neon";
-// import { Pool, neonConfig } from "@neondatabase/serverless";
-
-// const globalForPrisma = global as unknown as {
-//   prisma: PrismaClient;
-// };
-
-// neonConfig.webSocketConstructor = ws;
-
-// const connectionString = process.env.DATABASE_URL;
-// if (!connectionString) {
-//   throw new Error("DATABASE_URL environment variable is not set");
-// }
-
-// // console.log("Connecting to database with URL:", connectionString);
-
-// const pool = new Pool({ connectionString });
-// const adapter = new PrismaNeon(pool);
-// const prisma = globalForPrisma.prisma || new PrismaClient({ adapter });
-
-// if (process.env.NODE_ENV !== "production") {
-//   globalForPrisma.prisma = prisma;
-// }
-
-// export default prisma;
