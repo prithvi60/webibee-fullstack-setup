@@ -42,7 +42,7 @@ export async function POST(req: Request): Promise<Response> {
       switch (event.type) {
         case "checkout.session.completed":
           data = event.data.object;
-          console.log(`CheckoutSession status: ${data.payment_status}`);
+          // console.log(`CheckoutSession status: ${data.payment_status}`);
           break;
         default:
           throw new Error(`Unhandled event: ${event.type}`);

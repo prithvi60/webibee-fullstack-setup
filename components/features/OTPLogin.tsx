@@ -58,6 +58,26 @@ export const OTPLogin = () => {
 
             if (result.generateOtp.success) {
                 resetEmailForm();
+                const emailResponse = await fetch("/api/otpmail", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        email: data.email,
+                        otp: result.generateOtp.otp,
+                        expiryTime: result.generateOtp.expiresAt
+                    }),
+                });
+
+                await emailResponse.json();
+
+                if (!emailResponse.ok) {
+                    const errorData = await emailResponse.text();
+                    throw new Error(
+                        `Email API Error: ${emailResponse.status} ${errorData}`
+                    );
+                }
                 toast.success("OTP sent to your email", {
                     position: "top-right",
                     duration: 3000,

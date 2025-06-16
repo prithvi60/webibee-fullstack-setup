@@ -367,7 +367,7 @@ export const resolvers = {
 
         // Send OTP email
         const expiryTime = formatExpiryTime(expiresAt.toISOString());
-        await sendOtpEmail(normalizedEmail, otpCode, expiryTime);
+        // await sendOtpEmail(normalizedEmail, otpCode, expiryTime);
 
         return {
           success: true,
