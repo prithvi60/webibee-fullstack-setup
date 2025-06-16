@@ -7,7 +7,7 @@ import { ApexOptions } from 'apexcharts';
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 interface ApexChartProps {
-  type?: 'line' | 'bar' | 'area' | 'pie' | 'donut' | 'heatmap' | 'candlestick';
+  type?: 'line' | 'bar' | 'area' | 'pie' | 'donut' | 'heatmap' | 'candlestick' | 'radialBar';
   height?: number;
   width?: number | string;
   series: ApexOptions['series'];

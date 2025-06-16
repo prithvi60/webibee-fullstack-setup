@@ -101,5 +101,5 @@ export const authConfig = {
     },
   },
   trustHost: true,
-  debug: process.env.NODE_ENV !== "production",
+  // debug: process.env.NODE_ENV !== "production",
 } satisfies NextAuthConfig;
