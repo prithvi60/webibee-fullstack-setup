@@ -255,24 +255,94 @@ export const resolvers = {
 
       return createdFile;
     },
+    // generateOtp: async (_: any, { email }: { email: string }) => {
+    //   try {
+    //     // Validate email format
+    //     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    //     if (!emailRegex.test(email)) {
+    //       throw new Error("Invalid email format");
+    //     }
+
+    //     // Check if user exists in the database
+    //     const user = await prisma.user.findUnique({
+    //       where: { email },
+    //     });
+    //     if (!user) {
+    //       throw new Error("Email not registered");
+    //     }
+    //     // Invalidate any existing unverified OTPs
+    //     await prisma.otp.updateMany({
+    //       where: { email, verified: false },
+    //       data: { expiresAt: new Date() },
+    //     });
+
+    //     // Generate 6-digit numeric OTP
+    //     const otpCode = otpGenerator.generate(6, {
+    //       digits: true,
+    //       lowerCaseAlphabets: false,
+    //       upperCaseAlphabets: false,
+    //       specialChars: false,
+    //     });
+
+    //     const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+
+    //     await prisma.otp.create({
+    //       data: {
+    //         email,
+    //         otp: otpCode,
+    //         expiresAt,
+    //       },
+    //     });
+    //     const expiryTime = formatExpiryTime(expiresAt.toISOString());
+    //     await sendOtpEmail(email, otpCode, expiryTime);
+    //     return {
+    //       success: true,
+    //       message: "OTP generated successfully && OTP sent to your email",
+    //       otp: otpCode,
+    //       expiresAt: expiresAt.toISOString(),
+    //     };
+    //   } catch (error) {
+    //     console.error("OTP generation error:", error);
+    //     return {
+    //       success: false,
+    //       message: "Failed to generate OTP, Invalid Email Id",
+    //       otp: null,
+    //       expiresAt: null,
+    //     };
+    //   }
+    // },
     generateOtp: async (_: any, { email }: { email: string }) => {
       try {
         // Validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-          throw new Error("Invalid email format");
+          return {
+            success: false,
+            message: "Invalid email format",
+            otp: null,
+            expiresAt: null,
+          };
         }
+
+        // Normalize email (e.g., convert to lowercase)
+        const normalizedEmail = email.toLowerCase().trim();
 
         // Check if user exists in the database
         const user = await prisma.user.findUnique({
-          where: { email },
+          where: { email: normalizedEmail },
         });
         if (!user) {
-          throw new Error("Email not registered");
+          return {
+            success: false,
+            message: "Email not registered",
+            otp: null,
+            expiresAt: null,
+          };
         }
+
         // Invalidate any existing unverified OTPs
         await prisma.otp.updateMany({
-          where: { email, verified: false },
+          where: { email: normalizedEmail, verified: false },
           data: { expiresAt: new Date() },
         });
 
@@ -286,15 +356,19 @@ export const resolvers = {
 
         const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
+        // Create OTP in the database
         await prisma.otp.create({
           data: {
-            email,
+            email: normalizedEmail,
             otp: otpCode,
             expiresAt,
           },
         });
+
+        // Send OTP email
         const expiryTime = formatExpiryTime(expiresAt.toISOString());
-        await sendOtpEmail(email, otpCode, expiryTime);
+        await sendOtpEmail(normalizedEmail, otpCode, expiryTime);
+
         return {
           success: true,
           message: "OTP generated successfully && OTP sent to your email",
@@ -302,13 +376,43 @@ export const resolvers = {
           expiresAt: expiresAt.toISOString(),
         };
       } catch (error) {
-        console.error("OTP generation error:", error);
-        return {
-          success: false,
-          message: "Failed to generate OTP, Invalid Email Id",
-          otp: null,
-          expiresAt: null,
-        };
+        if (error && typeof error === "object" && "message" in error) {
+          console.error("OTP generation error:", {
+            error: (error as { message: string }).message,
+            stack: (error as { stack?: string }).stack,
+            email,
+          });
+          if ((error as { message: string }).message.includes("Invalid email format")) {
+            return {
+              success: false,
+              message: "Invalid email format",
+              otp: null,
+              expiresAt: null,
+            };
+          }
+          if ((error as { message: string }).message.includes("Email not registered")) {
+            return {
+              success: false,
+              message: "Email not registered",
+              otp: null,
+              expiresAt: null,
+            };
+          }
+          return {
+            success: false,
+            message: `Failed to generate OTP: ${(error as { message: string }).message}`,
+            otp: null,
+            expiresAt: null,
+          };
+        } else {
+          console.error("OTP generation error:", error);
+          return {
+            success: false,
+            message: "Failed to generate OTP due to an unknown error",
+            otp: null,
+            expiresAt: null,
+          };
+        }
       }
     },
     verifyOtp: async (
