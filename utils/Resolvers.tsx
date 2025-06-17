@@ -361,15 +361,6 @@ export const resolvers = {
             };
           }
         }
-        // try {
-        //   await prisma.otp.updateMany({
-        //     where: { email: normalizedEmail, verified: false },
-        //     data: { expiresAt: new Date() },
-        //   });
-        // } catch (e) {
-        //   console.error("Error during OTP updateMany", e);
-        //   throw new Error("Failed to update previous OTPs");
-        // }
 
         // Generate 6-digit numeric OTP
         const otpCode = otpGenerator.generate(6, {
@@ -394,13 +385,6 @@ export const resolvers = {
           console.error("Error during OTP create", e);
           throw new Error("Failed to create new OTP");
         }
-        // await prisma.otp.create({
-        //   data: {
-        //     email: normalizedEmail,
-        //     otp: otpCode,
-        //     expiresAt,
-        //   },
-        // });
 
         // Send OTP email
         const expiryTime = formatExpiryTime(expiresAt.toISOString());
