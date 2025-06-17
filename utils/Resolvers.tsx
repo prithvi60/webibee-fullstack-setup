@@ -341,19 +341,35 @@ export const resolvers = {
         }
 
         // Invalidate any existing unverified OTPs
-        try {
-          await prisma.otp.updateMany({
-            where: { email: normalizedEmail, verified: false },
-            data: { expiresAt: new Date() },
-          });
-        } catch (e) {
-          console.error("Error during OTP updateMany", e);
-          throw new Error("Failed to update previous OTPs");
+        const outdatedOtps = await prisma.otp.findMany({
+          where: { email: normalizedEmail, verified: false },
+        });
+
+        if (outdatedOtps.length > 0) {
+          try {
+            await prisma.otp.updateMany({
+              where: { email: normalizedEmail, verified: false },
+              data: { expiresAt: new Date() },
+            });
+          } catch (e) {
+            console.error("❌ Failed to invalidate old OTPs:", e);
+            return {
+              success: false,
+              message: "Failed to update old OTPs",
+              otp: null,
+              expiresAt: null,
+            };
+          }
         }
-        // await prisma.otp.updateMany({
-        //   where: { email: normalizedEmail, verified: false },
-        //   data: { expiresAt: new Date() },
-        // });
+        // try {
+        //   await prisma.otp.updateMany({
+        //     where: { email: normalizedEmail, verified: false },
+        //     data: { expiresAt: new Date() },
+        //   });
+        // } catch (e) {
+        //   console.error("Error during OTP updateMany", e);
+        //   throw new Error("Failed to update previous OTPs");
+        // }
 
         // Generate 6-digit numeric OTP
         const otpCode = otpGenerator.generate(6, {
