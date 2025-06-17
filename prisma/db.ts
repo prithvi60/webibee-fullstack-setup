@@ -18,7 +18,7 @@ if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is not set in environment variables");
 }
 
-const connectionString = `${process.env.DATABASE_URL}?sslmode=require&connect_timeout=30&pool_timeout=30&connection_limit=10`;
+const connectionString = `${process.env.DATABASE_URL}&connect_timeout=10&pool_timeout=10&connection_limit=5`;
 console.log("Using DATABASE_URL:", connectionString); // Debug log
 
 const adapter = new PrismaNeon({ connectionString });

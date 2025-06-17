@@ -341,10 +341,19 @@ export const resolvers = {
         }
 
         // Invalidate any existing unverified OTPs
-        await prisma.otp.updateMany({
-          where: { email: normalizedEmail, verified: false },
-          data: { expiresAt: new Date() },
-        });
+        try {
+          await prisma.otp.updateMany({
+            where: { email: normalizedEmail, verified: false },
+            data: { expiresAt: new Date() },
+          });
+        } catch (e) {
+          console.error("Error during OTP updateMany", e);
+          throw new Error("Failed to update previous OTPs");
+        }
+        // await prisma.otp.updateMany({
+        //   where: { email: normalizedEmail, verified: false },
+        //   data: { expiresAt: new Date() },
+        // });
 
         // Generate 6-digit numeric OTP
         const otpCode = otpGenerator.generate(6, {
@@ -357,13 +366,25 @@ export const resolvers = {
         const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
         // Create OTP in the database
-        await prisma.otp.create({
-          data: {
-            email: normalizedEmail,
-            otp: otpCode,
-            expiresAt,
-          },
-        });
+        try {
+          await prisma.otp.create({
+            data: {
+              email: normalizedEmail,
+              otp: otpCode,
+              expiresAt,
+            },
+          });
+        } catch (e) {
+          console.error("Error during OTP create", e);
+          throw new Error("Failed to create new OTP");
+        }
+        // await prisma.otp.create({
+        //   data: {
+        //     email: normalizedEmail,
+        //     otp: otpCode,
+        //     expiresAt,
+        //   },
+        // });
 
         // Send OTP email
         const expiryTime = formatExpiryTime(expiresAt.toISOString());
