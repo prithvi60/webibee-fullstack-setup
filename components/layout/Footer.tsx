@@ -60,7 +60,7 @@ const Footer = () => {
                     </div> */}
                 </div>
             </div>
-            <div className={`flex flex-col justify-center items-center lg:flex-row lg:justify-between gap-8 font-medium`}>
+            <div className={`flex flex-col justify-center items-center lg:flex-row lg:justify-between gap-4 md:gap-8 font-medium`}>
                 <ul className="hidden md:flex items-center gap-2.5">
                     {socialLinks.map((list, idx) => (
                         <li key={idx} className="flex-shrink-0">
@@ -71,6 +71,10 @@ const Footer = () => {
                 <p className="text-sm text-center capitalize font-medium lg:text-start md:text-base">
                     © {new Date().getFullYear()} <span className="text-text font-semibold">business portfolio</span>{" "}. All rights reserved
                 </p>
+                <div className="flex flex-col justify-center items-center lg:flex-row lg:justify-between gap-3 font-medium">
+                    <Link href={"/privacy-policy"} className={`text-sm capitalize md:text-base tracking-wide font-medium`}>Privacy Policy</Link>
+                    <Link href={"/terms"} className={`text-sm capitalize md:text-base tracking-wide font-medium`}>Terms of service</Link>
+                </div>
             </div>
         </footer>
     );
