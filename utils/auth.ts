@@ -134,6 +134,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           scope: "openid email profile",
         },
       },
+      // Allow email-based account linking with checks
+      allowDangerousEmailAccountLinking: true,
     }),
     Credentials({
       name: "credentials",
@@ -179,8 +181,49 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig.callbacks,
     async signIn({ user, account, profile }) {
       // Only handle Google provider
-      if (account?.provider === "google") {
+      if (account?.provider !== "credentials" && user.email) {
         try {
+          // Check if user exists
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email },
+            include: { Account: true },
+          });
+
+          if (existingUser) {
+            // Check if this provider is already linked
+            const isProviderLinked = existingUser.Account.some(
+              (acc) => account && acc.provider === account.provider
+            );
+
+            if (!isProviderLinked) {
+              // Link the new provider to existing account
+              await prisma.account.create({
+                data: {
+                  userId: existingUser.id,
+                  type: "oauth",
+                  provider: account?.provider ?? "",
+                  providerAccountId: account?.providerAccountId ?? "",
+                  access_token: account?.access_token ?? "",
+                  expires_at: account?.expires_at ?? null,
+                  token_type: account?.token_type ?? "",
+                  scope: account?.scope ?? "",
+                  id_token: account?.id_token ?? "",
+                  session_state:
+                    account?.session_state !== undefined &&
+                    account?.session_state !== null
+                      ? String(account.session_state)
+                      : "",
+                },
+              });
+            }
+
+            // Update the user object with existing user's data
+            user.id = existingUser.id.toString();
+            user.role = existingUser.role || "user";
+            user.phone_number = existingUser.phone_number || "";
+
+            return true;
+          }
           if (!user.email) {
             console.error("Google account has no email");
             return "/auth/error?error=no-email";
@@ -213,7 +256,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return true;
         } catch (error) {
           console.error("Google sign-in error:", error);
-          if (typeof error === "object" && error !== null && "code" in error && (error as any).code === "P2002") {
+          if (
+            typeof error === "object" &&
+            error !== null &&
+            "code" in error &&
+            (error as any).code === "P2002"
+          ) {
             return "/auth/error?error=account-conflict";
           }
           return "/auth/error?error=google-auth-failed";

@@ -6,7 +6,7 @@ import ws from "ws";
 // Configure Neon for WebSocket and fetch
 neonConfig.webSocketConstructor = ws;
 neonConfig.poolQueryViaFetch = true; // Required for edge environments
-neonConfig.fetchConnectionCache = true; // Cache connections for performance
+// neonConfig.fetchConnectionCache = true; // Cache connections for performance
 
 // Type definitions
 declare global {
@@ -19,7 +19,7 @@ if (!process.env.DATABASE_URL) {
 }
 
 const connectionString = `${process.env.DATABASE_URL}&connect_timeout=10&pool_timeout=10&connection_limit=5`;
-console.log("Using DATABASE_URL:", connectionString); // Debug log
+// console.log("Using DATABASE_URL:", connectionString); // Debug log
 
 const adapter = new PrismaNeon({ connectionString });
 const prisma =
